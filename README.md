@@ -1,16 +1,36 @@
 # glm-forecast-graphic
 
-Matt Nicholson
-Department of Atmospheric & Oceanic Science
-University of Maryland, College Park
-27 November 2018
+This package recreates the tropical cyclone intensity change forecasting graphic aid proposed by Stevenson et al. in their 2017 paper, cited below:
+
+> Stevenson, Stephanie N., et al. “A 10-Year Survey of Tropical Cyclone Inner-Core Lightning Bursts and Their Relationship to Intensity     > Change.” Weather and Forecasting, vol. 33, no. 1, Feb. 2018, pp. 23–36., doi:10.1175/waf-d-17-0096.1.
 
 
+### Prerequisites
+* Python 3.6
 
-This Python project recreates the tropical cyclone intensity forecasting graphic aid purposed by Stevenson et al. in their 2017 paper cited below:
 
-Stevenson, Stephanie N., et al. “A 10-Year Survey of Tropical Cyclone Inner-Core Lightning Bursts and Their Relationship to Intensity     Change.” Weather and Forecasting, vol. 33, no. 1, Feb. 2018, pp. 23–36., doi:10.1175/waf-d-17-0096.1.
+## Data Sources
+- National Oceanic & Atmospheric Administration (NOAA)
+  - GOES-16
+    - Advanced Baseline Imager (ABI)
+    - Geostationary Lightning Mapper (GLM)
+- National Hurricane Center (NHC)
+  - NOAA Aircraft Operations Center (AOC) & USAFRC 53rd Weather Reconnaissance Squadron (53rd WRS)
+    - Vortex Data Message (VDM) 
+    - TEMP DROP
 
-Written in Python 3.6
 
-These scripts incorporate data from GOES-16 ABI & GLM instruments and Vortex Data Message (VDM) & TEMP DROP aircraft observations. ABI & GLM data is downloaded from NOAA's GOES-16 Amazon AWS bucket. Aircraft observations are obtained from the National Hurricane Center's data server. 
+## Authors
+
+* **Matt Nicholson** - *Initial work* - Department of Atmospheric & Oceanic Science, University of Maryland, College Park
+
+
+## Acknowledgments
+
+* Pat Meyers, *Cooperative Institute for Climate & Satellites - Maryland (CICS-MD)*
+* Scott Rdlosky, *Cooperative Institute for Climate & Satellites - Maryland (CICS-MD)*
+* Tim Canty, *Department of Atmospheric & Oceanic Science, University of Maryland, College Park*
+* Stephanie N. Stevenson, *University at Albany, State University of New York, Albany, New York*
+* Kristen L. Corbosiero, *University at Albany, State University of New York, Albany, New York*
+* Mark DeMaria, *NOAA/NHC, Miami, Florida*
+* Jonathan L. Vigh, *National Center for Atmospheric Research, Boulder, Colorado*
