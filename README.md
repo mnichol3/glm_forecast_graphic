@@ -1,11 +1,11 @@
 # glm-forecast-graphic
+
 Matt Nicholson
-
 Department of Atmospheric & Oceanic Science
-
 University of Maryland, College Park
-
 27 November 2018
+
+
 
 This Python project recreates the tropical cyclone intensity forecasting graphic aid purposed by Stevenson et al. in their 2017 paper cited below:
 
