@@ -25,6 +25,11 @@ This package recreates the tropical cyclone intensity change forecasting graphic
 * **Matt Nicholson** - *Initial work* - Department of Atmospheric & Oceanic Science, University of Maryland, College Park
 
 
+## License
+
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+
+
 ## Acknowledgments
 
 * Pat Meyers, *Cooperative Institute for Climate & Satellites - Maryland (CICS-MD)*
