@@ -2,7 +2,7 @@
 
 This package recreates the tropical cyclone intensity change forecasting graphic aid proposed by Stevenson et al. in their 2017 paper, cited below:
 
-> Stevenson, Stephanie N., et al. “A 10-Year Survey of Tropical Cyclone Inner-Core Lightning Bursts and Their Relationship to Intensity     > Change.” Weather and Forecasting, vol. 33, no. 1, Feb. 2018, pp. 23–36., doi:10.1175/waf-d-17-0096.1.
+> Stevenson, Stephanie N., et al. “A 10-Year Survey of Tropical Cyclone Inner-Core Lightning Bursts and Their Relationship to Intensity      Change.” Weather and Forecasting, vol. 33, no. 1, Feb. 2018, pp. 23–36., doi:10.1175/waf-d-17-0096.1.
 
 
 ### Prerequisites
