@@ -33,7 +33,7 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 ## Acknowledgments
 
 * Pat Meyers, *Cooperative Institute for Climate & Satellites - Maryland (CICS-MD)*
-* Scott Rdlosky, *Cooperative Institute for Climate & Satellites - Maryland (CICS-MD)*
+* Scott Rudlosky, *Cooperative Institute for Climate & Satellites - Maryland (CICS-MD)*
 * Tim Canty, *Department of Atmospheric & Oceanic Science, University of Maryland, College Park*
 * Stephanie N. Stevenson, *University at Albany, State University of New York, Albany, New York*
 * Kristen L. Corbosiero, *University at Albany, State University of New York, Albany, New York*
