@@ -17,6 +17,7 @@ import os
 import sys
 
 
+
 ###############################################################################
 # Calculates the julian day (days since 01 Jan) from the date param. Needed to 
 # download from AWS server
@@ -211,4 +212,4 @@ def abi_dl(date, sector):
 
 
 # Example func call:
-#abi_dl('2018091214', 'meso1')
+#glm_dl('2018091214')

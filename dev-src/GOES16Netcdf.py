@@ -40,7 +40,7 @@ from shapely.ops import transform
 from shapely.geometry import Point
 from matplotlib.patches import Polygon
 from functools import partial
-
+from GLM_plotter import accumulate_data
 
 # TODO: modify to take fname as arg
 def read_file():
@@ -297,6 +297,14 @@ def plot_mercator(data_dict):
     
     plt.scatter(cent_lon,cent_lat, marker="+", color="r", transform=ccrs.PlateCarree(), 
                 s = 200)
+    
+    glm_data = accumulate_data('2018091214')
+    
+    flash_lons = glm_data[0]
+    flash_lats = glm_data[1]
+    
+    plt.scatter(flash_lons, flash_lats, marker='+', color='yellow',
+                transform=ccrs.PlateCarree())
     
     cbar = plt.colorbar(cmesh)
     # Increase font size of colorbar tick labels
