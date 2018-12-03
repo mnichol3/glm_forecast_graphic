@@ -42,6 +42,8 @@ from matplotlib.patches import Polygon
 from functools import partial
 from GLM_plotter import accumulate_data
 
+
+
 # TODO: modify to take fname as arg
 def read_file():
     

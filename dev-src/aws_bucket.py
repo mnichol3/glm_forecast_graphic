@@ -31,8 +31,6 @@ import sys
 def calc_julian_day(date):
     # Format: YYYYMMDDHHMM
     
-        
-    # Used to calculate julian day
                     # J   F   M   A   M   J   J   A   S   O   N   D
                     # 1   2   3   4   5   6   7   8   9   10  11  12
                     # 0   1   2   3   4   5   6   7   8   9   10  11
