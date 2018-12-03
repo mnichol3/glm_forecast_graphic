@@ -86,7 +86,6 @@ def glm_dl(date):
     
     keys = []
     prefix = 'GLM-L2-LCFA/' + year + '/' + julian_day + '/' + hour + '/OR_GLM-L2-LCFA_G16'
-    #prefix = 'GLM-L2-LCFA/2018/255/14/OR_GLM-L2-LCFA_G16'
     suffix = ''
     kwargs = {'Bucket': 'noaa-goes16', 'Prefix': prefix}
     
@@ -106,8 +105,7 @@ def glm_dl(date):
     dl_count = 0
     
     for x in keys:
-        #print(x)
-        
+       
         fname_match = re.search('s(\d{14})', x)
         
         if (fname_match):
@@ -189,8 +187,6 @@ def abi_dl(date, sector):
         
         fname_match = re.search('s(\d{11})', x)
         
-        #print(fname_match[1] + '.nc')
-        
         if (fname_match):
             fname = fname_match[1] + '.nc'
             try:
@@ -209,7 +205,3 @@ def abi_dl(date, sector):
     sys.stdout.flush()
     
     return abi_fnames
-
-
-# Example func call:
-#glm_dl('2018091214')
