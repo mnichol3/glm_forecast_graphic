@@ -6,19 +6,10 @@ Created on Tue Oct 23 11:06:59 2018
 """
 
 from netCDF4 import Dataset
-from datetime import datetime, timedelta
 import numpy as np
 import matplotlib.pyplot as plt
-import pyproj
 import cartopy.crs as ccrs
-import matplotlib.ticker as mticker
-from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
-import matplotlib.cm as cm
 from cartopy.feature import NaturalEarthFeature
-from shapely.ops import transform
-from shapely.geometry import Point
-from matplotlib.patches import Polygon
-from functools import partial
 from aws_bucket import glm_dl 
 import os
 
