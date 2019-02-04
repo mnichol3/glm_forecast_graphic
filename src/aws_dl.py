@@ -149,7 +149,8 @@ def calc_julian_day(date):
 #                                       is 1-hr block. Format: YYYYMMDDHH
 #
 # @return   glm_fnames (list of str)    List of filenames downloaded. 
-#                                       Format: YYYYMMDDHHMM.nc
+#                                       Format: YYYYDDDHHMMSSS.nc, where 
+#                                       DDD is the Julian Day
 ###############################################################################
 def glm_dl(date):
     glm_fnames = []
@@ -205,7 +206,7 @@ def glm_dl(date):
     return glm_fnames
 
 
-
+# TODO: Change date format to YYYYMMDDHHMM?
 ###############################################################################
 # Downloads GOES-16 ABI data files from NOAA's AWS server
 #

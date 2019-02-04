@@ -51,7 +51,7 @@ from GLM_plotter import accumulate_data
 # @param    fname (str)                 Name of the GOES-16 ABI data file to be 
 #                                       processed
 #
-# @return   glm_data (list of arrays)   List of GLM flash latitudes & longitudes. 
+# @return   data_dict (list of arrays)  Dictionary of ABI image information 
 #                                       
 ###############################################################################
 def read_file(fname):
