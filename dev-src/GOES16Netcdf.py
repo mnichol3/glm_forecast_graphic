@@ -40,6 +40,8 @@ from shapely.ops import transform
 from shapely.geometry import Point
 from matplotlib.patches import Polygon
 from functools import partial
+from GLM_plotter import accumulate_data
+
 
 
 # TODO: modify to take fname as arg
@@ -56,15 +58,9 @@ def read_file():
     # Ch. 13 - 'Clean' Longwave window. Not much different than Ch. 11
     #fname = 09142018_2101z_Meso1_Ch13.nc
     
-    #file = r"C:\Users\Salty Pete\Desktop\2018_Fall\Senior Research\09142018_2101z_Meso1.nc"
     file = r"C:\Users\Salty Pete\Desktop\2018_Fall\Senior Research\20180912_1457z_Meso1_Ch1.nc"
 
     fh = Dataset(file, mode='r')
-
-    #print(fh.dimensions.keys())
-    #print(fh.variables.keys())
-    
-    #print(fh.variables['y_image'])
     
     data_dict['band_id'] = fh.variables['band_id'][0]
     
@@ -87,12 +83,10 @@ def read_file():
     
     # Satellite height
     sat_height = fh.variables['goes_imager_projection'].perspective_point_height
-    #print(sat_height)
     
     # Satellite longitude & latitude
     sat_lon = fh.variables['goes_imager_projection'].longitude_of_projection_origin
     sat_lat = fh.variables['goes_imager_projection'].latitude_of_projection_origin
-    #print(sat_lon)
     
     # Satellite lat/lon extend
     lat_lon_extent = {}
@@ -112,8 +106,6 @@ def read_file():
     
     Xs = fh.variables['x'][:]
     Ys = fh.variables['y'][:]
-    
-    #print(radiance)
     
     fh.close()
     
@@ -297,6 +289,14 @@ def plot_mercator(data_dict):
     
     plt.scatter(cent_lon,cent_lat, marker="+", color="r", transform=ccrs.PlateCarree(), 
                 s = 200)
+    
+    glm_data = accumulate_data('2018091214')
+    
+    flash_lons = glm_data[0]
+    flash_lats = glm_data[1]
+    
+    plt.scatter(flash_lons, flash_lats, marker='+', color='yellow',
+                transform=ccrs.PlateCarree())
     
     cbar = plt.colorbar(cmesh)
     # Increase font size of colorbar tick labels
