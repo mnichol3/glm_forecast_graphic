@@ -26,6 +26,8 @@
 # 
 # 
 # =============================================================================
+
+
 from netCDF4 import Dataset
 from datetime import datetime, timedelta
 import numpy as np
@@ -43,9 +45,16 @@ from functools import partial
 from GLM_plotter import accumulate_data
 
 
-
-# TODO: modify to take fname as arg
-def read_file():
+###############################################################################
+# Opens & reads a GOES-16 ABI data file, returning a dictionary of data
+#
+# @param    fname (str)                 Name of the GOES-16 ABI data file to be 
+#                                       processed
+#
+# @return   glm_data (list of arrays)   List of GLM flash latitudes & longitudes. 
+#                                       
+###############################################################################
+def read_file(fname):
     
     data_dict = {}
     
@@ -58,9 +67,9 @@ def read_file():
     # Ch. 13 - 'Clean' Longwave window. Not much different than Ch. 11
     #fname = 09142018_2101z_Meso1_Ch13.nc
     
-    file = r"C:\Users\Salty Pete\Desktop\2018_Fall\Senior Research\20180912_1457z_Meso1_Ch1.nc"
+    #file = r"C:\Users\Salty Pete\Desktop\2018_Fall\Senior Research\20180912_1457z_Meso1_Ch1.nc"
 
-    fh = Dataset(file, mode='r')
+    fh = Dataset(fname, mode='r')
     
     data_dict['band_id'] = fh.variables['band_id'][0]
     
@@ -328,5 +337,15 @@ if __name__ == '__main__':
     #print(georeference(data_dict))
     plot_mercator(data_dict)
     #plot_geos(data_dict)
+
+
+
+
+
+
+
+
+
+
 
 
