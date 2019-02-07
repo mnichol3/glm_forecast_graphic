@@ -54,7 +54,7 @@ from GLM_plotter import accumulate_data
 # @return   data_dict (list of arrays)  Dictionary of ABI image information 
 #                                       
 ###############################################################################
-def read_file(fname):
+def read_file():
     
     data_dict = {}
     
@@ -67,9 +67,9 @@ def read_file(fname):
     # Ch. 13 - 'Clean' Longwave window. Not much different than Ch. 11
     #fname = 09142018_2101z_Meso1_Ch13.nc
     
-    #file = r"C:\Users\Salty Pete\Desktop\2018_Fall\Senior Research\20180912_1457z_Meso1_Ch1.nc"
+    file = r"C:\Users\Salty Pete\Desktop\2018_Fall\Senior Research\20180912_1457z_Meso1_Ch1.nc"
 
-    fh = Dataset(fname, mode='r')
+    fh = Dataset(file, mode='r')
     
     data_dict['band_id'] = fh.variables['band_id'][0]
     
@@ -131,6 +131,34 @@ def read_file(fname):
     return data_dict
 
 
+
+# =============================================================================
+# Calculate latitude & longitude of each point with pyproj
+#
+# =============================================================================
+def georeference(data_dict):
+    
+    sat_height = data_dict['sat_height']
+    sat_lon = data_dict['sat_lon']
+    sat_sweep = data_dict['sat_sweep']
+    data = data_dict['data'] # (1000, 1000) array
+    
+    # Multiplying by sat height might not be necessary here
+    Xs = data_dict['x'] * sat_height # (1000,)
+    Ys = data_dict['y'] * sat_height # (1000,)
+    
+    p = pyproj.Proj(proj='geos', h=sat_height, lon_0=sat_lon, sweep=sat_sweep)
+    
+    lons, lats = np.meshgrid(Xs, Ys)
+    lons, lats = p(lons, lats, inverse=True)
+     
+    lats[np.isnan(data)] = 57
+    lons[np.isnan(data)] = -152
+    
+    return (lons, lats)
+
+
+
 # =============================================================================
 # Plot the GOES-16 netcdf file on a geostationary-projection map
 # =============================================================================
@@ -165,34 +193,14 @@ def plot_geos(data_dict):
     plt.title('GOES-16 Imagery', fontweight='semibold', fontsize=15)
     plt.title('%s' % scan_date.strftime('%H:%M UTC %d %B %Y'), loc='right')
     plt.pcolormesh(X, Y, data, cmap=cm.Greys_r)
+    
+    cent_lat = 29.93
+    cent_lon = -71.35
+    
+    plt.scatter(cent_lon,cent_lat, marker="+", color="r", transform=ccrs.PlateCarree(), 
+                s = 200)
+    
     plt.show()
-
-
-
-# =============================================================================
-# Calculate latitude & longitude of each point with pyproj
-#
-# =============================================================================
-def georeference(data_dict):
-    
-    sat_height = data_dict['sat_height']
-    sat_lon = data_dict['sat_lon']
-    sat_sweep = data_dict['sat_sweep']
-    data = data_dict['data'] # (1000, 1000) array
-    
-    # Multiplying by sat height might not be necessary here
-    Xs = data_dict['x'] * sat_height # (1000,)
-    Ys = data_dict['y'] * sat_height # (1000,)
-    
-    p = pyproj.Proj(proj='geos', h=sat_height, lon_0=sat_lon, sweep=sat_sweep)
-    
-    lons, lats = np.meshgrid(Xs, Ys)
-    lons, lats = p(lons, lats, inverse=True)
-     
-    lats[np.isnan(data)] = np.nan
-    lons[np.isnan(data)] = np.nan
-    
-    return (lons, lats)
 
 
 
@@ -205,18 +213,13 @@ def plot_mercator(data_dict):
     # the scanning angle (in radians) multiplied by the satellite height 
     # (http://proj4.org/projections/geos.html)
     
-    sat_height = data_dict['sat_height']
     scan_date = data_dict['scan_date']
     data = data_dict['data']
-    
-    Xs = data_dict['x'] * sat_height
-    Ys = data_dict['y'] * sat_height
     
     globe = ccrs.Globe(semimajor_axis=data_dict['semimajor_ax'], semiminor_axis=data_dict['semiminor_ax'], 
                        flattening=None, inverse_flattening=data_dict['inverse_flattening'])
     
     Xs, Ys = georeference(data_dict)
-    
     
     fig = plt.figure(figsize=(10, 5))
     
@@ -231,8 +234,8 @@ def plot_mercator(data_dict):
     # TODO: For presentation sample, disable title and add it back in on ppt
     plt.title('GOES-16 Ch.' + str(data_dict['band_id']) + ' ' + str(data_dict['band_wavelength']) + 'um', 
               fontweight='semibold', fontsize=12, loc='left')
-    print('!!! WARNING: Storm name label currently hard-coded !!!')
     
+    print('!!! WARNING: Storm name label currently hard-coded !!!')
     plt.title('Florence - %s' % scan_date.strftime('%H:%M UTC %d %B %Y'), loc='right')
     
     # TODO: dynamically get low pressure center lat & lon

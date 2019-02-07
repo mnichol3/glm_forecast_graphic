@@ -83,5 +83,5 @@ def plot_data(data):
     
     
 # Ex. func calls    
-data = accumulate_data('2018091214')   
-plot_data(data)
+#data = accumulate_data('2018091214')   
+#plot_data(data)
