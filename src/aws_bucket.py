@@ -18,7 +18,26 @@ import sys
 
 
 
+def get_os():
+    """
+    Determines the type of operating system being used. Needed for when we are
+    loading & saving local files later
 
+    Parameters
+    ------------
+    none
+
+    Returns
+    ------------
+    os_type : str
+        Type of OS the script is running on
+        Ex: 'linux' is the script is running on a Linux OS, such as Ubuntu
+    """
+    os_type = sys.platform
+    return os_type
+
+
+    
 def calc_julian_day(date):
     """
     Calculates the Julian Day (days since 01 Jan) for a given date. Needed to
@@ -111,7 +130,10 @@ def glm_dl(date):
         except KeyError:
             break
 
-    path = 'D:\Documents\senior-research-data\glm'
+    if (get_os() == 'linux'):
+        path = '/home/mnichol3/Documents/senior-rsch/data/glm'
+    else:
+        path = 'D:\Documents\senior-research-data\glm'
     dl_count = 0
 
     for x in keys:
@@ -197,7 +219,10 @@ def abi_dl(date, sector):
         except KeyError:
             break
 
-    path = 'D:\Documents\senior-research-data\abi'
+    if (get_os() == 'linux'):
+        path = '/home/mnichol3/Documents/senior-rsch/data/abi'
+    else:
+        path = 'D:\Documents\senior-research-data\abi'
     dl_count = 0
 
     for x in keys:

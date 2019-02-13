@@ -30,6 +30,26 @@ plot_data(data)
 
 
 
+def get_os():
+    """
+    Determines the type of operating system being used. Needed for when we are
+    loading & saving local files later
+
+    Parameters
+    ------------
+    none
+
+    Returns
+    ------------
+    os_type : str
+        Type of OS the script is running on
+        Ex: 'linux' is the script is running on a Linux OS, such as Ubuntu
+    """
+    os_type = sys.platform
+    return os_type
+
+
+
 def accumulate_data(date_time):
     """
     Accumulates GOES-16 GLM data dowloaded from NOAA's Amazon AWS server
@@ -52,15 +72,18 @@ def accumulate_data(date_time):
     flash_lats = np.array([])
     flash_lons = np.array([])
 
+    if (get_os() == 'linux'):
+        path = '/home/mnichol3/Documents/senior-rsch/data/glm'
+    else:
+        path = 'D:\Documents\senior-research-data\glm'
+
     for x in date_time:
 
         fnames = glm_dl(x)
 
-        base_path = 'D:\Documents\senior-research-data\glm'
-
         for file in fnames:
 
-            file_path = os.path.join(base_path, file)
+            file_path = os.path.join(path, file)
             fh = Dataset(file_path, mode='r')
 
             flash_lats = np.append(flash_lats, fh.variables['flash_lat'][:])

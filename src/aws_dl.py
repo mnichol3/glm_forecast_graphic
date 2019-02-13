@@ -237,7 +237,10 @@ def glm_dl(date):
         except KeyError:
             break
 
-    path = 'D:\Documents\senior-research-data\glm'
+    if (get_os() == 'linux'):
+        path = '/home/mnichol3/Documents/senior-rsch/data/glm'
+    else:
+        path = 'D:\Documents\senior-research-data\glm'
     dl_count = 0
 
     for x in keys:
@@ -322,7 +325,10 @@ def abi_dl(date, sector):
         except KeyError:
             break
 
-    path = 'D:\Documents\senior-research-data\abi'
+    if (get_os() == 'linux'):
+        path = '/home/mnichol3/Documents/senior-rsch/data/abi'
+    else:
+        path = 'D:\Documents\senior-research-data\glm'
     dl_count = 0
 
     for x in keys:

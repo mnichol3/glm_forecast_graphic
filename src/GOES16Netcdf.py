@@ -43,7 +43,26 @@ from GLM_plotter import accumulate_data
 
 
 
+def get_os():
+    """
+    Determines the type of operating system being used. Needed for when we are
+    loading & saving local files later
 
+    Parameters
+    ------------
+    none
+
+    Returns
+    ------------
+    os_type : str
+        Type of OS the script is running on
+        Ex: 'linux' is the script is running on a Linux OS, such as Ubuntu
+    """
+    os_type = sys.platform
+    return os_type
+
+
+    
 def read_file():
     """
     Opens & reads a GOES-16 ABI data file, returning a dictionary of data
@@ -72,7 +91,13 @@ def read_file():
     # Ch. 13 - 'Clean' Longwave window. Not much different than Ch. 11
     #fname = 09142018_2101z_Meso1_Ch13.nc
 
-    file = r"C:\Users\Salty Pete\Desktop\2018_Fall\Senior Research\20180912_1457z_Meso1_Ch1.nc"
+    # TODO : add the test file to linux folder
+    if (get_os() == 'linux'):
+        file = '/home/mnichol3/Documents/senior-rsch/data/glm'
+    else:
+        file = r"C:\Users\Salty Pete\Desktop\2018_Fall\Senior Research\20180912_1457z_Meso1_Ch1.nc"
+
+    #file = r"C:\Users\Salty Pete\Desktop\2018_Fall\Senior Research\20180912_1457z_Meso1_Ch1.nc"
 
     fh = Dataset(file, mode='r')
 
