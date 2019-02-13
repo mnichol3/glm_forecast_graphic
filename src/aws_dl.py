@@ -19,6 +19,7 @@ import botocore
 import re
 import os
 import sys
+import csv
 
 
 
@@ -201,6 +202,8 @@ def glm_dl(date_lst):
     Download ALL GOES-16 GLM data files from NOAA's Amazon AWS server for the
     given date, time, & hour.
 
+    13 Feb 19 : Now writes fnames to glm_fnames.csv
+
     Ex:
     date = '2018092812' (12z Sept 9, 2018)
     All GLM files from 201809281200 (1200z) to 201809281259 (1259z) will be
@@ -238,6 +241,8 @@ def glm_dl(date_lst):
         year = date[:4]
         hour = date[-2:]
         julian_day = calc_julian_day(date)
+        month = date[4:6]
+        day = date[6:8]
 
         keys = []
         prefix = 'GLM-L2-LCFA/' + year + '/' + julian_day + '/' + hour + '/OR_GLM-L2-LCFA_G16'
@@ -262,9 +267,10 @@ def glm_dl(date_lst):
 
             if (fname_match):
                 fname = fname_match[1] + '.nc'
+                local_fname = year + month + day + hour + fname[-8:-3] + '.nc'
                 try:
-                    sys.stdout.write("\rDownloading GLM datafile: {}".format(fname))
-                    s3.download_file('noaa-goes16', x, os.path.join(path, fname))
+                    sys.stdout.write("\rDownloading GLM datafile: {}".format(local_fname))
+                    s3.download_file('noaa-goes16', x, os.path.join(path, local_fname))
                     glm_fnames.append(fname)
                     dl_count += 1
                     sys.stdout.flush()
@@ -277,7 +283,13 @@ def glm_dl(date_lst):
     sys.stdout.write("\rFinished! Files downloaded: {}              ".format(dl_count))
     sys.stdout.flush()
     print("\n")
-
+    '''
+    fname = 'glm_fnames-' + date_lst[0] + '-' + date_lst[-1] + '.csv'
+    with open(os.path.join(path, fname), 'w') as f:
+        writer = csv.writer(f, lineterminator='\n')
+        for x in glm_fnames:
+            writer.writerow([x])
+    '''
     return glm_fnames
 
 
@@ -371,5 +383,11 @@ def abi_dl(date_lst, sector):
     sys.stdout.write("\rFinished! Files downloaded: {}              ".format(dl_count))
     sys.stdout.flush()
     print("\n")
-
+    '''
+    fname = 'abi_fnames-' + date_lst[0] + '-' + date_lst[-1] + '.csv'
+    with open(os.path.join(path, fname), 'w') as f:
+        writer = csv.writer(f, lineterminator='\n')
+        for x in abi_fnames:
+            writer.writerow([x])
+    '''
     return abi_fnames
