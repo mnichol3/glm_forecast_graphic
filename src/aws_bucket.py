@@ -37,7 +37,7 @@ def get_os():
     return os_type
 
 
-    
+
 def calc_julian_day(date):
     """
     Calculates the Julian Day (days since 01 Jan) for a given date. Needed to

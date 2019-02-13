@@ -56,7 +56,7 @@ def accumulate_data(date_time):
 
     Parameters
     ------------
-    date_time : str
+    date_time : list of str
         Date & time of the desired files, in a 1-hr block. Format: YYYYMMDDHH
 
     Returns
@@ -77,19 +77,17 @@ def accumulate_data(date_time):
     else:
         path = 'D:\Documents\senior-research-data\glm'
 
-    for x in date_time:
+    fnames = glm_dl(date_time)
 
-        fnames = glm_dl(x)
+    for file in fnames:
 
-        for file in fnames:
+        file_path = os.path.join(path, file)
+        fh = Dataset(file_path, mode='r')
 
-            file_path = os.path.join(path, file)
-            fh = Dataset(file_path, mode='r')
+        flash_lats = np.append(flash_lats, fh.variables['flash_lat'][:])
+        flash_lons = np.append(flash_lons, fh.variables['flash_lon'][:])
 
-            flash_lats = np.append(flash_lats, fh.variables['flash_lat'][:])
-            flash_lons = np.append(flash_lons, fh.variables['flash_lon'][:])
-
-            fh.close()
+        fh.close()
 
     glm_data = [flash_lons, flash_lats]
 
