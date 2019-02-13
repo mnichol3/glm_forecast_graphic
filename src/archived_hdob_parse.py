@@ -3,6 +3,24 @@
 Created on Wed Oct  3 18:52:14 2018
 
 @author: Matt Nicholson
+
+These functions identify, download, & parse High Density Observation (HDOB) files
+on the National Hurricane Center's data server
+
+Example usage:
+
+date = '20181009'
+time = '1458'
+storm_name = 'michael'
+
+file_dict = get_archived_fnames(date)
+#write_fname_dict(file_dict, date, storm_name, 1)
+#print(file_dict['usaf'])
+nfile_dict = create_archived_HDOB_file(file_dict['usaf'], storm_name, date+time)
+print(nfile_dict)
+#write_fname_dict(nfile_dict, date, storm_name, 2)
+plot_flight(nfile_dict)
+#print(create_archived_HDOB_file(['TEST'], 'GORDON'))
 """
 
 import pandas as pd
@@ -539,26 +557,3 @@ def plot_flight(fname_dict):
         plt.tight_layout()
 
         plt.show()
-
-
-
-# =============================================================================
-#                           ~* MAIN *~
-# =============================================================================
-def main():
-    date = '20181009'
-    time = '1458'
-    storm_name = 'michael'
-
-    file_dict = get_archived_fnames(date)
-    #write_fname_dict(file_dict, date, storm_name, 1)
-    #print(file_dict['usaf'])
-    nfile_dict = create_archived_HDOB_file(file_dict['usaf'], storm_name, date+time)
-    print(nfile_dict)
-    #write_fname_dict(nfile_dict, date, storm_name, 2)
-    plot_flight(nfile_dict)
-    #print(create_archived_HDOB_file(['TEST'], 'GORDON'))
-
-
-if __name__ == "__main__":
-    main()
