@@ -22,6 +22,26 @@ import sys
 
 
 
+def get_os():
+    """
+    Determines the type of operating system being used. Needed for when we are
+    loading & saving local files later
+
+    Parameters
+    ------------
+    none
+
+    Returns
+    ------------
+    os_type : str
+        Type of OS the script is running on
+        Ex: 'linux' is the script is running on a Linux OS, such as Ubuntu
+    """
+    os_type = sys.platform
+    return os_type
+
+
+
 def padding_zero(int_to_pad, lim):
     """
     Adds a leading, or padding, zero to an integer if needed. Returns the int
