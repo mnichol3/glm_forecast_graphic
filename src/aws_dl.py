@@ -196,14 +196,21 @@ def calc_julian_day(date):
 
 
 
-def glm_dl(date):
+def glm_dl(date_lst):
     """
-    Download GOES-16 GLM data files from NOAA's Amazon AWS server
+    Download ALL GOES-16 GLM data files from NOAA's Amazon AWS server for the
+    given date, time, & hour.
+
+    Ex:
+    date = '2018092812' (12z Sept 9, 2018)
+    All GLM files from 201809281200 (1200z) to 201809281259 (1259z) will be
+    downloaded, totaling 180 files as GLM files are published every 20 seconds
 
     Parameters
     ------------
-    date : str
-        Date & time of the desired files, in a 1-hr block. Format: YYYYMMDDHH
+    date_lst : list of str
+        List of date & time string of the desired files, in a 1-hr block.
+        Format: YYYYMMDDHH
 
     Returns
     ------------
@@ -212,70 +219,78 @@ def glm_dl(date):
         Format: YYYMMDDHHMM.nc
     """
     glm_fnames = []
-
-    s3 = boto3.client('s3')
-    s3.meta.events.register('choose-signer.s3.*', disable_signing)
-
-    year = date[:4]
-    hour = date[-2:]
-    julian_day = calc_julian_day(date)
-
-    keys = []
-    prefix = 'GLM-L2-LCFA/' + year + '/' + julian_day + '/' + hour + '/OR_GLM-L2-LCFA_G16'
-    suffix = ''
-    kwargs = {'Bucket': 'noaa-goes16', 'Prefix': prefix}
-
-    while True:
-        resp = s3.list_objects_v2(**kwargs)
-        for obj in resp['Contents']:
-            key = obj['Key']
-            if key.endswith(suffix):
-                keys.append(key)
-
-        try:
-            kwargs['ContinuationToken'] = resp['NextContinuationToken']
-        except KeyError:
-            break
+    dl_count = 0
 
     if (get_os() == 'linux'):
         path = '/home/mnichol3/Documents/senior-rsch/data/glm'
     else:
         path = 'D:\Documents\senior-research-data\glm'
-    dl_count = 0
 
-    for x in keys:
+    s3 = boto3.client('s3')
+    s3.meta.events.register('choose-signer.s3.*', disable_signing)
 
-        fname_match = re.search('s(\d{14})', x)
+    # If a string is passed instead of a list of strings
+    if (type(date_lst) == str):
+        date_lst = [date_lst]
 
-        if (fname_match):
-            fname = fname_match[1] + '.nc'
+    for date in date_lst:
+
+        year = date[:4]
+        hour = date[-2:]
+        julian_day = calc_julian_day(date)
+
+        keys = []
+        prefix = 'GLM-L2-LCFA/' + year + '/' + julian_day + '/' + hour + '/OR_GLM-L2-LCFA_G16'
+        suffix = ''
+        kwargs = {'Bucket': 'noaa-goes16', 'Prefix': prefix}
+
+        while True:
+            resp = s3.list_objects_v2(**kwargs)
+            for obj in resp['Contents']:
+                key = obj['Key']
+                if key.endswith(suffix):
+                    keys.append(key)
+
             try:
-                sys.stdout.write("\rDownloading GLM datafile: {}".format(fname))
-                s3.download_file('noaa-goes16', x, os.path.join(path, fname))
-                glm_fnames.append(fname)
-                dl_count += 1
-                sys.stdout.flush()
-            except botocore.exceptions.ClientError as e:
-                if e.response['Error']['Code'] == "404":
-                    print("The file does not exist in this AWS bucket.")
-                else:
-                    print("Error downloading file from AWS")
+                kwargs['ContinuationToken'] = resp['NextContinuationToken']
+            except KeyError:
+                break
+
+        for x in keys:
+
+            fname_match = re.search('s(\d{14})', x)
+
+            if (fname_match):
+                fname = fname_match[1] + '.nc'
+                try:
+                    sys.stdout.write("\rDownloading GLM datafile: {}".format(fname))
+                    s3.download_file('noaa-goes16', x, os.path.join(path, fname))
+                    glm_fnames.append(fname)
+                    dl_count += 1
+                    sys.stdout.flush()
+                except botocore.exceptions.ClientError as e:
+                    if e.response['Error']['Code'] == "404":
+                        print("The file does not exist in this AWS bucket.")
+                    else:
+                        print("Error downloading file from AWS\n")
 
     sys.stdout.write("\rFinished! Files downloaded: {}              ".format(dl_count))
     sys.stdout.flush()
+    print("\n")
 
     return glm_fnames
 
 
 
-def abi_dl(date, sector):
+def abi_dl(date_lst, sector):
     """
     Downlad GOES-16 ABI data files from NOAA's Amazon AWS server
 
     Parameters
     ------------
-    date : str
-        Date & time of the desired files, in a 1-hr block. Format: YYYYMMDDHH
+    date_lst : list of str
+        List of the dates & times of the desired files, in a 1-hr block.
+        Format: YYYYMMDDHH
     sector : str
         Sector of the GOES-16 imagery to download. "M1" -> mesoscale 1,
         "M2" -> mesoscale 2, "C" -> CONUS
@@ -287,6 +302,16 @@ def abi_dl(date, sector):
         Format: YYYYMMDDHHMM.nc
     """
     abi_fnames = []
+    dl_count = 0
+
+    if (get_os() == 'linux'):
+        path = '/home/mnichol3/Documents/senior-rsch/data/abi'
+    else:
+        path = 'D:\Documents\senior-research-data\glm'
+
+    # Make sure we have a list
+    if (type(date_lst) == str):
+        date_lst = [date_lst]
 
     s3 = boto3.client('s3')
     s3.meta.events.register('choose-signer.s3.*', disable_signing)
@@ -304,52 +329,47 @@ def abi_dl(date, sector):
     else:
         print('Error: Invalid sector parameter!')
         return
+    for date in date_lst:
+        year = date[:4]
+        hour = date[-2:]
+        julian_day = calc_julian_day(date)
 
-    year = date[:4]
-    hour = date[-2:]
-    julian_day = calc_julian_day(date)
+        prefix = 'ABI-L1b-RadM/' + year + '/' + julian_day + '/' + hour + '/OR_ABI-L1b-Rad' + sector_prefix + '-M3C01_G16'
+        suffix = ''
+        kwargs = {'Bucket': 'noaa-goes16', 'Prefix': prefix}
 
-    prefix = 'ABI-L1b-RadM/' + year + '/' + julian_day + '/' + hour + '/OR_ABI-L1b-Rad' + sector_prefix + '-M3C01_G16'
-    suffix = ''
-    kwargs = {'Bucket': 'noaa-goes16', 'Prefix': prefix}
+        while True:
+            resp = s3.list_objects_v2(**kwargs)
+            for obj in resp['Contents']:
+                key = obj['Key']
+                if key.endswith(suffix):
+                    keys.append(key)
 
-    while True:
-        resp = s3.list_objects_v2(**kwargs)
-        for obj in resp['Contents']:
-            key = obj['Key']
-            if key.endswith(suffix):
-                keys.append(key)
-
-        try:
-            kwargs['ContinuationToken'] = resp['NextContinuationToken']
-        except KeyError:
-            break
-
-    if (get_os() == 'linux'):
-        path = '/home/mnichol3/Documents/senior-rsch/data/abi'
-    else:
-        path = 'D:\Documents\senior-research-data\glm'
-    dl_count = 0
-
-    for x in keys:
-
-        fname_match = re.search('s(\d{11})', x)
-
-        if (fname_match):
-            fname = fname_match[1] + '.nc'
             try:
-                sys.stdout.write("\rDownloading GLM datafile: {}".format(fname))
-                s3.download_file('noaa-goes16', x, os.path.join(path, fname))
-                abi_fnames.append(fname)
-                dl_count += 1
-                sys.stdout.flush()
-            except botocore.exceptions.ClientError as e:
-                if e.response['Error']['Code'] == "404":
-                    print("The file does not exist in this AWS bucket.")
-                else:
-                    print("Error downloading file from AWS")
+                kwargs['ContinuationToken'] = resp['NextContinuationToken']
+            except KeyError:
+                break
+
+        for x in keys:
+
+            fname_match = re.search('s(\d{11})', x)
+
+            if (fname_match):
+                fname = fname_match[1] + '.nc'
+                try:
+                    sys.stdout.write("\rDownloading GLM datafile: {}".format(fname))
+                    s3.download_file('noaa-goes16', x, os.path.join(path, fname))
+                    abi_fnames.append(fname)
+                    dl_count += 1
+                    sys.stdout.flush()
+                except botocore.exceptions.ClientError as e:
+                    if e.response['Error']['Code'] == "404":
+                        print("The file does not exist in this AWS bucket.")
+                    else:
+                        print("Error downloading file from AWS")
 
     sys.stdout.write("\rFinished! Files downloaded: {}              ".format(dl_count))
     sys.stdout.flush()
+    print("\n")
 
     return abi_fnames
