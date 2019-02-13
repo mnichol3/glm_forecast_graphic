@@ -368,9 +368,10 @@ def abi_dl(date_lst, sector):
 
             if (fname_match):
                 fname = fname_match[1] + '.nc'
+                local_fname = year + month + day + hour + fname[-8:-3] + '.nc'
                 try:
-                    sys.stdout.write("\rDownloading GLM datafile: {}".format(fname))
-                    s3.download_file('noaa-goes16', x, os.path.join(path, fname))
+                    sys.stdout.write("\rDownloading ABI datafile: {}".format(fname))
+                    s3.download_file('noaa-goes16', x, os.path.join(path, local_fname))
                     abi_fnames.append(fname)
                     dl_count += 1
                     sys.stdout.flush()
