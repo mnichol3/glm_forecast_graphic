@@ -10,8 +10,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 from cartopy.feature import NaturalEarthFeature
-from aws_dl import glm_dl
-import os
+from aws_dl import glm_dl, calc_julian_day
+import sys
+from os import listdir
+from os.path import isfile, join
 
 '''
 This script opens & reads downloaded GLM datafiles, accumulating the flash
@@ -64,30 +66,46 @@ def accumulate_data(date_time):
     glm_data : list of str
         List of GLM flash latitudes & longitudes
     """
+    flash_lats = np.array([])
+    flash_lons = np.array([])
+    julian_days = ['a'] * len(date_time)
+    times_to_dl = []
 
     # Make date_time a list if its not one already
     if (type(date_time) == str):
         date_time = [date_time]
-
-    flash_lats = np.array([])
-    flash_lons = np.array([])
 
     if (get_os() == 'linux'):
         path = '/home/mnichol3/Documents/senior-rsch/data/glm'
     else:
         path = 'D:\Documents\senior-research-data\glm'
 
-    fnames = glm_dl(date_time)
+    # Get list of already downloaded files
+    curr_files = [f for f in listdir(path) if isfile(join(path, f))]
 
-    for file in fnames:
+    for x in date_time:
+        if (sum(x in fn for fn in curr_files) < 180):
+            # Indicates the whole hour has not been downloaded
+            times_to_dl.append(x)
 
-        file_path = os.path.join(path, file)
-        fh = Dataset(file_path, mode='r')
+    # Only call the download function if needed
+    if (times_to_dl != []):
+        print('GLM_plotter.py is calling glm_dl!')
+        glm_dl(times_to_dl)
+    else:
+        print('GLM_plotter.py is NOT calling glm_dl!')
 
-        flash_lats = np.append(flash_lats, fh.variables['flash_lat'][:])
-        flash_lons = np.append(flash_lons, fh.variables['flash_lon'][:])
+    for day in julian_days:
+        fnames = [f for f in listdir(path) if isfile(join(path, f)) and day in f]
 
-        fh.close()
+        for f in fnames:
+            file_path = join(path, f)
+            fh = Dataset(file_path, mode='r')
+
+            flash_lats = np.append(flash_lats, fh.variables['flash_lat'][:])
+            flash_lons = np.append(flash_lons, fh.variables['flash_lon'][:])
+
+            fh.close()
 
     glm_data = [flash_lons, flash_lats]
 
