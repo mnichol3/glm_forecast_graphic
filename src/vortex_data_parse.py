@@ -2,7 +2,10 @@
 """
 Created on Tue Oct 16 09:20:05 2018
 
-@author: Salty Pete
+@author: Matt Nicholson
+
+These functions deal with downloading, parsing, & processing NOAA & USAF
+Vortex Data Message (VDM) aircraft observations
 """
 
 import pandas as pd
@@ -10,10 +13,24 @@ from urllib.request import urlopen
 import re
 import os
 
+
 BASE_URL = "https://www.nhc.noaa.gov/archive/recon/"
 
 
 def hours_mins_2_mins(time):
+    """
+    Converts a time consisting of hours & minutes to minutes
+
+    Parameters
+    ------------
+    time : str
+        Time, in hours & minutes, to be converted to minutes
+
+    Returns
+    ------------
+    mins_tot : int
+        Time converted from hours:minutes to minutes
+    """
     if (type(time) != str):
         print("Error: Time must be of type str")
         return -1
@@ -28,6 +45,19 @@ def hours_mins_2_mins(time):
 
 
 def dec_2_deg(coord):
+    """
+    Converts a coordinate from decimal minutes to decimal degrees
+
+    Parameters
+    ------------
+    coord : str
+        Coordinate to be converted from decimal minutes to decimal degrees
+
+    Returns
+    ------------
+    deg : str
+        Coordinate transformed into decimal degrees
+    """
 
     splt = coord.split('.')
 
@@ -44,6 +74,36 @@ def dec_2_deg(coord):
 
 
 def get_vdm(date, time, storm_name, octant = 'REPNT2'):
+    """
+    Downloads a VDM from within a specific storm for a given day & time.
+
+    Parameters
+    ------------
+    date : str
+        Date the observation was taken
+    time : str
+        Time the observation was taken
+    storm_name : str
+        Name of the storm the observation was taken in
+    octant : str
+        Octant that the obs was taken within. Default is REPNT2
+
+    Returns
+    ------------
+    vdm_dict : dictionary of VDM data
+
+    Ex:
+    vdm_dict['date_time'] = data[4][3:]
+    coords = data[5].split(' ')
+    vdm_dict['lat'] = coords[1] + coords[3]
+    vdm_dict['lon'] = coords[4] + coords[6]
+    vdm_dict['min SLP'] = coords[7][3:]
+    vdm_dict['inbnd max sfc wind b&r'] = data[12][3:]
+    vdm_dict['inbnd max FL wind b&r'] = data[14][3:]
+    vdm_dict['outbnd max sfc wind b&r'] = data[16][3:]
+    vdm_dict['outbnd max FL wind b&r'] = data[18][3:]
+    vdm_dict['acft storm info'] = data[24][3:]
+    """
 
     vdm_dict = {}
 
@@ -133,6 +193,28 @@ def get_vdm(date, time, storm_name, octant = 'REPNT2'):
 
 
 def vdm_df(date_time_start, date_time_end, storm_name, octant = 'REPNT2'):
+    """
+    Creates a Pandas dataframe with accumulated VDM data, writes the dataframe
+    to a csv, and returns the dataframe
+
+    Parameters
+    ------------
+    date_time_start : str
+        Starting date & time of VDMs
+    date_time_end : str
+        Ending date & time of VDMs
+    storm_name : str
+        Name of the storm the VDMs were taken in
+    octant : str
+        Octant the VDMs were taken in
+
+    Returns
+    ------------
+    vdm_df : Pandas dataframe
+        A Pandas dataframe containing an accumulation of data from multiple VDMs
+        The dataframe is then written to a csv
+
+    """
 
     if (type(date_time_start) != str):
         date_time_start = str(date_time_start)
@@ -284,6 +366,20 @@ def vdm_df(date_time_start, date_time_end, storm_name, octant = 'REPNT2'):
 
 
 def read_vdm_csv(fname):
+    """
+    Reads a csv file that a Pandas dataframe of accumulated VDM data was written
+    to & returns the csv data as a Pandas dataframe
+
+    Parameters
+    ------------
+    fname : str
+        Name of the csv file the Pandas dataframe was written to
+
+    Returns
+    ------------
+    vdm_df : Pandas dataframe
+        Dataframe containing the data in the fname csv
+    """
 
     if ('2018' in fname):
         col_names = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']

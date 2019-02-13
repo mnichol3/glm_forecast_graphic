@@ -2,7 +2,7 @@
 """
 Created on Wed Oct 17 16:30:46 2018
 
-@author: Salty Pete
+@author: Matt Nicholson
 """
 
 import pandas as pd
@@ -15,29 +15,29 @@ def mins_since(time_list):
     times = []
     tot_mins = 0
     for x in time_list:
-        
+
         if (type(x) != str):
             x = str(x)
-        
+
         curr_time = x[-4:]
         mins = int(curr_time[-2:])
         hrs = int(curr_time[:-2])
         day = int(x[-6:-4])
-        
+
         # Adjust the day
         if (day >= 30):
             day = day - 30
         else:
             day += 1
-        
+
         tot_mins = (day * 1440) + (hrs * 60) + mins
         times.append(tot_mins)
-        
+
     return times
-        
-        
-        
-        
+
+
+
+
 
 
 
@@ -92,7 +92,3 @@ plt.tight_layout()
 plt.show()
 
 plt.savefig('filename1.png')
-
-
-
-
