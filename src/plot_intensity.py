@@ -2,7 +2,7 @@
 """
 Created on Mon Dec  3 18:13:48 2018
 
-@author: Salty Pete
+@author: Matt Nicholson
 
 Little utility script to plot wind intensity and storm tracks
 """
@@ -19,10 +19,10 @@ storms = ['chris', 'florence', 'harvey', 'michael']
 #for x in storms:
 x = storms[2] + '.csv'
 file_path = os.path.join(base_path, x)
-    
-df = pd.read_csv(file_path, dtype={'date':str, 'lat':str, 'lon':str, 
+
+df = pd.read_csv(file_path, dtype={'date':str, 'lat':str, 'lon':str,
                                    'wind-sstn (kt)':int, 'wind-gst (kt)':int})
-  
+
 date_time = df['date'].tolist()
 lats = df['lat'].tolist()
 lons = df['lon'].tolist()
@@ -32,16 +32,16 @@ lats = [float(x[:-1]) for x in lats]
 lons = [float(y[:-1])*-1 for y in lons]
 
 fig = plt.figure(figsize=(10, 5))
-    
+
 ax = fig.add_subplot(1, 1, 1, projection=ccrs.Mercator())
-    
+
 states = NaturalEarthFeature(category='cultural', scale='50m', facecolor='black',
                          name='admin_1_states_provinces_shp')
 
 land = NaturalEarthFeature('physical', 'land', '50m', facecolor='black')
 
 ocean = NaturalEarthFeature('physical', 'ocean', '50m', facecolor='black')
-  
+
 ax.add_feature(land, linewidth=.8, edgecolor='gray', zorder = 1)
 ax.add_feature(states, linewidth=.8, edgecolor='gray', zorder = 2)
 ax.add_feature(ocean, linewidth=.8, edgecolor='gray', zorder = 0)
@@ -75,7 +75,7 @@ plt.xticks(rotation='vertical')
 plt.xlabel('Date-Time (UTC)')
 plt.grid(True)
 
-plt.title('Hurricane Michael Wind - October 2018') 
+plt.title('Hurricane Michael Wind - October 2018')
 
 plt.legend()
 
