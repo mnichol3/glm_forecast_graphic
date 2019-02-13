@@ -6,6 +6,14 @@ Created on Tue Oct 16 09:20:05 2018
 
 These functions deal with downloading, parsing, & processing NOAA & USAF
 Vortex Data Message (VDM) aircraft observations
+
+Ex:
+date = '20180913'
+time = '1600'
+storm_name = 'florence'
+#vdm_dict = get_vdm(date, time, storm_name)
+#print(vdm_dict)
+vdm_df('201708300000', '201709130600', 'irma')
 """
 
 import pandas as pd
@@ -411,19 +419,3 @@ def read_vdm_csv(fname):
     vdm_df.columns = col_names
 
     return vdm_df
-
-
-
-def main():
-    date = '20180913'
-    time = '1600'
-    storm_name = 'florence'
-    #vdm_dict = get_vdm(date, time, storm_name)
-    #print(vdm_dict)
-    vdm_df('201708300000', '201709130600', 'irma')
-
-
-
-
-if __name__ == "__main__":
-    main()
