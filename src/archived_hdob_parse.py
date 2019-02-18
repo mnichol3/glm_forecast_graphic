@@ -39,7 +39,7 @@ from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 import math
 import manager as mg
 
-BASE_URL = 'https://www.nhc.noaa.gov/archive/recon/''
+BASE_URL = 'https://www.nhc.noaa.gov/archive/recon/'
 PATH_LINUX = '/home/mnichol3/Documents/senior-rsch/data/hdob'
 PATH_WIN = r'D:\Documents\senior-research-data\hdob'
 
