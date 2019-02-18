@@ -22,7 +22,7 @@ import re
 import os
 
 
-BASE_URL = 'https://www.nhc.noaa.gov/archive/recon/''
+BASE_URL = 'https://www.nhc.noaa.gov/archive/recon/'
 PATH_LINUX = '/home/mnichol3/Documents/senior-rsch/data/vdm'
 PATH_WIN = 'D:\Documents\senior-research-data\vdm'
 
@@ -148,15 +148,13 @@ def get_vdm(date, time, storm_name, octant = 'REPNT2'):
     url = BASE_URL + year + "/" + octant + "/"
 
     try:
-        df = pd.read_html(url, skiprows=[0,1,2,3,4,5,6,7,8,9])[0]
+        df = pd.read_html(url, skiprows=[0,1,2,3,4,5,6,7,8,9], index_col=0)[0]
 
     except Exception:
         return -1
 
     else:
-        df = df.dropna(how="all")
-        fnames = df[1].tolist()
-
+        fnames = [f for f in df.iloc[:,0].tolist() if str(f) != 'nan']
         obsDateTime = year + month + day
         # Matches all files published during that day for both NOAA & USAF flights
         regex = re.compile(r'(\w{6}-\w{4}\.)' + re.escape(obsDateTime) + r'(\d{4}\.txt)')
@@ -211,7 +209,9 @@ def get_vdm(date, time, storm_name, octant = 'REPNT2'):
                    coords = data[5].split(' ')
                    vdm_dict['lat'] = coords[1] + coords[3]
                    vdm_dict['lon'] = coords[4] + coords[6]
-                   vdm_dict['min SLP'] = coords[7][3:]
+
+                   curr_data = data[6].split(' ')
+                   vdm_dict['min SLP'] = curr_data[1] + ' mb'
                    vdm_dict['inbnd max sfc wind b&r'] = data[12][3:]
                    vdm_dict['inbnd max FL wind b&r'] = data[14][3:]
                    vdm_dict['outbnd max sfc wind b&r'] = data[16][3:]
@@ -246,15 +246,26 @@ def vdm_df(date_time_start, date_time_end, storm_name, octant = 'REPNT2'):
 
         Columns:
 
-        A : Date time
-        B : Latitude
-        C : Longitude
-        D : Minimum SLP
-        E : Inbound maximum surface wind bearing & range
-        F : Inbound maximum flight-level wind bearing & range
-        G : Outbound maximum surface wind bearing & range
-        H : Outbound maximum flight-level wind bearing & range
-        I : Aircfraft info
+            2018+ files:
+                A : Date time
+                B : Latitude
+                C : Longitude
+                D : Minimum SLP
+                E : Inbound maximum surface wind bearing & range
+                F : Inbound maximum flight-level wind bearing & range
+                G : Outbound maximum surface wind bearing & range
+                H : Outbound maximum flight-level wind bearing & range
+                I : Aircfraft info
+
+            Files previous to 2018:
+                A : Date time
+                B : Latitude
+                C : Longitude
+                D : Minimum SLP
+                E : Inbound maximum surface wind bearing & range
+                F : Inbound maximum flight-level wind bearing & range
+                G : Outbound maximum flight-level wind bearing & range
+                H : Aircfraft info
 
     """
 
@@ -429,15 +440,26 @@ def read_vdm_csv(fname):
 
         Columns:
 
-        A : Date time
-        B : Latitude
-        C : Longitude
-        D : Minimum SLP
-        E : Inbound maximum surface wind bearing & range
-        F : Inbound maximum flight-level wind bearing & range
-        G : Outbound maximum surface wind bearing & range
-        H : Outbound maximum flight-level wind bearing & range
-        I : Aircfraft info
+            2018+ files:
+                A : Date time
+                B : Latitude
+                C : Longitude
+                D : Minimum SLP
+                E : Inbound maximum surface wind bearing & range
+                F : Inbound maximum flight-level wind bearing & range
+                G : Outbound maximum surface wind bearing & range
+                H : Outbound maximum flight-level wind bearing & range
+                I : Aircfraft info
+
+            Files previous to 2018:
+                A : Date time
+                B : Latitude
+                C : Longitude
+                D : Minimum SLP
+                E : Inbound maximum surface wind bearing & range
+                F : Inbound maximum flight-level wind bearing & range
+                G : Outbound maximum flight-level wind bearing & range
+                H : Aircfraft info
     """
 
     if ('2018' in fname):
