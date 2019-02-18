@@ -22,8 +22,9 @@ import re
 import os
 
 
-BASE_URL = "https://www.nhc.noaa.gov/archive/recon/"
-
+BASE_URL = 'https://www.nhc.noaa.gov/archive/recon/''
+PATH_LINUX = '/home/mnichol3/Documents/senior-rsch/data/vdm'
+PATH_WIN = 'D:\Documents\senior-research-data\vdm'
 
 
 def get_os():
@@ -241,7 +242,19 @@ def vdm_df(date_time_start, date_time_end, storm_name, octant = 'REPNT2'):
     ------------
     vdm_df : Pandas dataframe
         A Pandas dataframe containing an accumulation of data from multiple VDMs
-        The dataframe is then written to a csv
+        The dataframe is then written to a csv.
+
+        Columns:
+
+        A : Date time
+        B : Latitude
+        C : Longitude
+        D : Minimum SLP
+        E : Inbound maximum surface wind bearing & range
+        F : Inbound maximum flight-level wind bearing & range
+        G : Outbound maximum surface wind bearing & range
+        H : Outbound maximum flight-level wind bearing & range
+        I : Aircfraft info
 
     """
 
@@ -310,7 +323,7 @@ def vdm_df(date_time_start, date_time_end, storm_name, octant = 'REPNT2'):
                print(x)     # Leave this in as a progress indicator
                month = x.split('.')[1][4:6]
                # USAF HDBO files have to extra lines at the end containing "$$"
-               # and ";". We shell remove these
+               # and ";". We shall remove these
                data = data_str.splitlines()
                #print(data)
 
@@ -383,11 +396,16 @@ def vdm_df(date_time_start, date_time_end, storm_name, octant = 'REPNT2'):
 
         new_fname = "VDM-" + storm_name + "-" + date_time_start + "-" + date_time_end + ".txt"
 
-        if not os.path.exists(os.path.join(octant, year_start + '-' + storm_name)):
-            os.makedirs(os.path.join(octant, year_start + '-' + storm_name))
+        if (get_os() == 'linux'):
+            path = PATH_LINUX
+        else:
+            path = PATH_WIN
 
-        path = os.path.join(octant, year_start + '-' + storm_name, new_fname)
-        with open(path, 'w') as file:
+        if not os.path.exists(os.path.join(path, octant, year_start + '-' + storm_name)):
+            os.makedirs(os.path.join(path, octant, year_start + '-' + storm_name))
+
+        abs_path = os.path.join(path, octant, year_start + '-' + storm_name, new_fname)
+        with open(abs_path, 'w') as file:
             vdm_df.to_csv(file, sep = ',', header=False, index=False)
 
         return vdm_df
@@ -407,7 +425,19 @@ def read_vdm_csv(fname):
     Returns
     ------------
     vdm_df : Pandas dataframe
-        Dataframe containing the data in the fname csv
+        Dataframe containing the data in the fname csv.
+
+        Columns:
+
+        A : Date time
+        B : Latitude
+        C : Longitude
+        D : Minimum SLP
+        E : Inbound maximum surface wind bearing & range
+        F : Inbound maximum flight-level wind bearing & range
+        G : Outbound maximum surface wind bearing & range
+        H : Outbound maximum flight-level wind bearing & range
+        I : Aircfraft info
     """
 
     if ('2018' in fname):
