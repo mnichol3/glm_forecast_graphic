@@ -7,6 +7,18 @@ This package recreates the tropical cyclone intensity change forecasting graphic
 
 ### Prerequisites
 * Python 3.6
+  * Boto3
+  * Botocore
+  * Cartopy
+  * Functools
+  * Matplotlib
+  * NetCDF4
+  * Numpy
+  * Pandas
+  * Pyproj
+  * Shapely
+  * urllib
+
 
 
 ## Data Sources
@@ -16,7 +28,7 @@ This package recreates the tropical cyclone intensity change forecasting graphic
     - Geostationary Lightning Mapper (GLM)
 - National Hurricane Center (NHC)
   - NOAA Aircraft Operations Center (AOC) & USAFRC 53rd Weather Reconnaissance Squadron (53rd WRS)
-    - Vortex Data Message (VDM) 
+    - Vortex Data Message (VDM)
     - TEMP DROP
 
 
