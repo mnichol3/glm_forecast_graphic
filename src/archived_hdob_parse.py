@@ -40,8 +40,8 @@ import math
 import manager as mg
 
 BASE_URL = 'https://www.nhc.noaa.gov/archive/recon/''
-PATH_LINUX = '/home/mnichol3/Documents/senior-rsch/data/vdm'
-PATH_WIN = 'D:\Documents\senior-research-data\vdm'
+PATH_LINUX = '/home/mnichol3/Documents/senior-rsch/data/hdob'
+PATH_WIN = r'D:\Documents\senior-research-data\hdob'
 
 def minutes_degrees(coord, kywrd):
     """
