@@ -37,8 +37,11 @@ from matplotlib.colors import LinearSegmentedColormap
 from matplotlib import cm
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 import math
+import manager as mg
 
-BASE_URL = "https://www.nhc.noaa.gov/archive/recon/"
+BASE_URL = 'https://www.nhc.noaa.gov/archive/recon/''
+PATH_LINUX = '/home/mnichol3/Documents/senior-rsch/data/vdm'
+PATH_WIN = 'D:\Documents\senior-research-data\vdm'
 
 def minutes_degrees(coord, kywrd):
     """
@@ -107,6 +110,12 @@ def create_archived_HDOB_file(fnames, storm_name_param, date_time):
     """
     global BASE_URL
     new_fnames = {}
+
+    if (mg.get_os() == 'linux'):
+        path = PATH_LINUX
+    else:
+        path = PATH_WIN
+
     # NHC data server url format:
     # https://www.nhc.noaa.gov/archive/recon/2018/AHONT1/AHONT1-KNHC.201801032351.txt
 
@@ -193,11 +202,11 @@ def create_archived_HDOB_file(fnames, storm_name_param, date_time):
                prev_calls = acft_callsign
                prev_obs_num = obs_num
 
-               if not os.path.exists(os.path.join(octant, year + '-' + storm_name)):
-                   os.makedirs(os.path.join(octant, year + '-' + storm_name))
+               if not os.path.exists(os.path.join(path, octant, year + '-' + storm_name)):
+                   os.makedirs(os.path.join(path, octant, year + '-' + storm_name))
 
-               path = os.path.join(octant, year + '-' + storm_name, new_fname)
-               with open(path, 'w') as file:
+               abs_path = os.path.join(path, octant, year + '-' + storm_name, new_fname)
+               with open(abs_path, 'w') as file:
                    df.to_csv(file, sep = ',', header=False, index=False)
 
                new_key = obs_date + '-' + storm_name + '-' + acft_callsign
@@ -286,11 +295,11 @@ def create_archived_HDOB_file(fnames, storm_name_param, date_time):
                prev_calls = acft_callsign
                prev_obs_num = obs_num
 
-               if not os.path.exists(os.path.join(octant, year + '-' + storm_name)):
-                   os.makedirs(os.path.join(octant, year + '-' + storm_name))
+               if not os.path.exists(os.path.join(path, octant, year + '-' + storm_name)):
+                   os.makedirs(os.path.join(path, octant, year + '-' + storm_name))
 
-               path = os.path.join(octant, year + '-' + storm_name, new_fname)
-               with open(path, 'w') as file:
+               abs_path = os.path.join(path, octant, year + '-' + storm_name, new_fname)
+               with open(abs_path, 'w') as file:
                    df.to_csv(file, sep = ',', header=False, index=False)
 
                new_key = obs_date + '-' + storm_name + '-' + acft_callsign
@@ -465,6 +474,11 @@ def plot_flight(fname_dict):
 
     df_list = []
 
+    if (mg.get_os() == 'linux'):
+        path = PATH_LINUX
+    else:
+        path = PATH_WIN
+
     for key, val in fname_dict.items():
 
         #print("Key: " + key)
@@ -475,13 +489,11 @@ def plot_flight(fname_dict):
         year = obs_date[:4]
         callsign = info[3]
 
-        cwd = os.getcwd()
-
-        base_path = os.path.join(cwd, "AHONT1", year + "-" + storm_name)
+        base_path = os.path.join(path, "AHONT1", year + "-" + storm_name)
 
         for x in val:
-            path = os.path.join(base_path, x)
-            curr = pd.read_csv(path, sep=",", dtype = str, header=None)
+            abs_path = os.path.join(base_path, x)
+            curr = pd.read_csv(abs_path, sep=",", dtype = str, header=None)
             curr.columns = ["ObsTime", "Lat", "Lon", "StatAirPress", "GeoPotHgt",
                             "SfcPressDVal", "T_air", "T_dew", "WndDirSpd", "WndPk",
                             "SfcWndPk", "RainRate", "Qflags"]
