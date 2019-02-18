@@ -34,7 +34,7 @@ This package recreates the tropical cyclone intensity change forecasting graphic
 
 ## Authors
 
-* **Matt Nicholson** - *Initial work* - Department of Atmospheric & Oceanic Science, University of Maryland, College Park
+* **Matt Nicholson** - Department of Atmospheric & Oceanic Science, University of Maryland, College Park
 
 
 ## License
