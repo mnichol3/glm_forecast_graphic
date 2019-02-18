@@ -21,11 +21,12 @@ from urllib.request import urlopen
 import re
 import os
 import sys
+import numpy as np
 
 
 BASE_URL = 'https://www.nhc.noaa.gov/archive/recon/'
 PATH_LINUX = '/home/mnichol3/Documents/senior-rsch/data/vdm'
-PATH_WIN = 'D:\Documents\senior-research-data\vdm'
+PATH_WIN = r'D:\Documents\senior-research-data\vdm'
 
 
 def get_os():
@@ -45,6 +46,14 @@ def get_os():
     """
     os_type = sys.platform
     return os_type
+
+
+
+def mins_between(date_time_start, date_time_end):
+    """
+    Calculates the minutes between two dates & times
+    Date time format: MHH
+    """
 
 
 
@@ -252,10 +261,10 @@ def vdm_df(date_time_start, date_time_end, storm_name, octant = 'REPNT2'):
                 B : Latitude
                 C : Longitude
                 D : Minimum SLP
-                E : Inbound maximum surface wind bearing & range
-                F : Inbound maximum flight-level wind bearing & range
-                G : Outbound maximum surface wind bearing & range
-                H : Outbound maximum flight-level wind bearing & range
+                E : Inbound maximum surface wind, incl. bearing & range
+                F : Inbound maximum flight-level wind, incl. bearing & range
+                G : Outbound maximum surface wind, incl. bearing & range
+                H : Outbound maximum flight-level wind, incl. bearing & range
                 I : Aircfraft info
 
             Files previous to 2018:
@@ -263,9 +272,9 @@ def vdm_df(date_time_start, date_time_end, storm_name, octant = 'REPNT2'):
                 B : Latitude
                 C : Longitude
                 D : Minimum SLP
-                E : Inbound maximum surface wind bearing & range
-                F : Inbound maximum flight-level wind bearing & range
-                G : Outbound maximum flight-level wind bearing & range
+                E : Inbound maximum surface wind, incl. bearing & range
+                F : Inbound maximum flight-level wind, incl. bearing & range
+                G : Outbound maximum flight-level wind, incl. bearing & range
                 H : Aircfraft info
 
     """
@@ -390,6 +399,7 @@ def vdm_df(date_time_start, date_time_end, storm_name, octant = 'REPNT2'):
                            curr_list.append(outbnd.group(1))    # outbnd max FL wind b&r
                        else:
                            curr_list.append(0)
+
                        curr_list.append(data[20][3:])           # acft storm info
 
                        data_list.append(curr_list)
@@ -402,7 +412,7 @@ def vdm_df(date_time_start, date_time_end, storm_name, octant = 'REPNT2'):
             col_names.append(alpha[i])
             i += 1
         #col_names = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']
-        vdm_df = pd.DataFrame(data_list, columns=col_names)
+        vdm_df = pd.DataFrame(data_list, columns=col_names, dtype=str)
         vdm_df = vdm_df.sort_values(by=['A'])
 
         new_fname = "VDM-" + storm_name + "-" + date_time_start + "-" + date_time_end + ".txt"
@@ -445,10 +455,10 @@ def read_vdm_csv(fname):
                 B : Latitude
                 C : Longitude
                 D : Minimum SLP
-                E : Inbound maximum surface wind bearing & range
-                F : Inbound maximum flight-level wind bearing & range
-                G : Outbound maximum surface wind bearing & range
-                H : Outbound maximum flight-level wind bearing & range
+                E : Inbound maximum surface wind, incl. bearing & range
+                F : Inbound maximum flight-level wind, incl. bearing & range
+                G : Outbound maximum surface wind, incl. bearing & range
+                H : Outbound maximum flight-level wind, incl. bearing & range
                 I : Aircfraft info
 
             Files previous to 2018:
@@ -456,9 +466,9 @@ def read_vdm_csv(fname):
                 B : Latitude
                 C : Longitude
                 D : Minimum SLP
-                E : Inbound maximum surface wind bearing & range
-                F : Inbound maximum flight-level wind bearing & range
-                G : Outbound maximum flight-level wind bearing & range
+                E : Inbound maximum surface wind, incl. bearing & range
+                F : Inbound maximum flight-level wind, incl. bearing & range
+                G : Outbound maximum flight-level wind, incl. bearing & range
                 H : Aircfraft info
     """
 
@@ -471,3 +481,55 @@ def read_vdm_csv(fname):
     vdm_df.columns = col_names
 
     return vdm_df
+
+
+
+def lin_interp(vdm_df, interval):
+    """
+    This function takes a dataframe of accumulated VDM data and linearly
+    interpolates the time and low pressure center coordinates on 5-minute
+    intervals
+
+    Parameters
+    ----------
+    vdm_df : Pandas DataFrame
+        DataFrame containing accumulated VDM data
+
+        Columns:
+
+            2018+ files:
+                A : Date time
+                B : Latitude
+                C : Longitude
+                D : Minimum SLP
+                E : Inbound maximum surface wind, incl. bearing & range
+                F : Inbound maximum flight-level wind, incl. bearing & range
+                G : Outbound maximum surface wind, incl. bearing & range
+                H : Outbound maximum flight-level wind, incl. bearing & range
+                I : Aircfraft info
+
+            Files previous to 2018:
+                A : Date time
+                B : Latitude
+                C : Longitude
+                D : Minimum SLP
+                E : Inbound maximum surface wind, incl. bearing & range
+                F : Inbound maximum flight-level wind, incl. bearing & range
+                G : Outbound maximum flight-level wind, incl. bearing & range
+                H : Aircfraft info
+
+    interval : int
+        Interval at which to linearly interpolate the data, in minutes.
+        Ex: interval = 5 --> data will be interpolated to 5 min intervals
+
+    Returns
+    -------
+    interp_vdf : Pandas Dataframe
+        Pandas Dataframe holding the interpolated data
+
+
+    Notes
+    -----
+
+
+    """

@@ -136,13 +136,13 @@ def get_obs_file(start_date, end_date, storm_name, obs_type, mode):
     obs_path = get_obs_path(obs_type)
     subdir = year + '-' + storm_name.upper()
     abs_path = join(obs_path, subdir)
-    files = [f for f in listdir(abs_path) if isfile(join(abs_path, f))]
+    files = [(f, abs_path) for f in listdir(abs_path) if isfile(join(abs_path, f))]
 
     if (mode == 'a'):
         return files
     elif (mode == 's'):
         for f in files:
-            if (start_date in f and end_date in f):
+            if (start_date in f[0] and end_date in f[0]):
                 return [f]
     else:
         print('ERROR: Invalid mode parameter (manager.get_obs_file)')
@@ -157,25 +157,30 @@ def main():
     #glm_data = GLM_plotter.accumulate_data(['2018091218'])
     #GLM_plotter.plot_data(glm_data)
 
-    """
+
     # vortex_data_parse
     date = '20180913'
     time = '1600'
     storm_name = 'florence'
-    """
-    fname = 'VDM-IRMA-201708300000-201709130600.txt'
+
+
+    #fname = 'VDM-IRMA-201708300000-201709130600.txt'
     #vdm_dict = vdp.get_vdm(date, time, storm_name)
     #print(vdm_dict)
-    #vdp.vdm_df('201708300000', '201709130600', 'irma')
+    vdp.vdm_df('201708300000', '201709130600', 'irma')
+
+
+    '''
     year = '2017'
     storm_name = 'IRMA'
     start_date = '20170830'
     end_date = '20170913'
-    #vdm_df = vdp.read_vdm_csv(fname)
-    #print(vdm_df)
-    fname = get_obs_file(start_date, end_date, storm_name, 'vdm', 's')
-    
-
+    f_info = get_obs_file(start_date, end_date, storm_name, 'vdm', 's')[0]
+    fname = f_info[0]
+    fpath = f_info[1]
+    f_abs = join(fpath, fname)
+    print(vdp.read_vdm_csv(f_abs))
+    '''
 
 
 
