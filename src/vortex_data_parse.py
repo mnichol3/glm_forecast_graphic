@@ -20,6 +20,7 @@ import pandas as pd
 from urllib.request import urlopen
 import re
 import os
+import sys
 
 
 BASE_URL = 'https://www.nhc.noaa.gov/archive/recon/'
@@ -291,14 +292,13 @@ def vdm_df(date_time_start, date_time_end, storm_name, octant = 'REPNT2'):
     storm_name = storm_name.upper()
 
     try:
-        df = pd.read_html(url, skiprows=[0,1,2,3,4,5,6,7,8,9])[0]
+        df = pd.read_html(url, skiprows=[0,1,2,3,4,5,6,7,8,9], index_col=0)[0]
 
     except Exception:
         return -1
 
     else:
-        df = df.dropna(how="all")
-        fnames = df[1].tolist()
+        fnames = [f for f in df.iloc[:,0].tolist() if str(f) != 'nan']
 
         obsDateTime = year_start + month_start
         # Matches all files published during that month for both NOAA & USAF flights
