@@ -1,6 +1,6 @@
 # Don't track these folders
-src/__pycache__/*.pyc
-__pycache__/*.pyc
+src/__pycache__/
+__pycache__/
 
 # Don't track these damn pyc files
 *.pyc
