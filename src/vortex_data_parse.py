@@ -22,6 +22,7 @@ import re
 import os
 import sys
 import numpy as np
+from aws_dl import padding_zero
 
 
 BASE_URL = 'https://www.nhc.noaa.gov/archive/recon/'
@@ -49,11 +50,73 @@ def get_os():
 
 
 
-def mins_between(date_time_start, date_time_end):
+def calc_min_list(date_time_start, date_time_end):
     """
-    Calculates the minutes between two dates & times
-    Date time format: MHH
+    Returns a list of datetime strings for every minute between date_time_start
+    & date_time_end (inclusive)
+    Date time format: MoMoDDHHMM (Mo = month, M = minute)
+
+    Parameters
+    ----------
+    date_time_start : str
+        Beginning date & time. Must be before date_time_end
+        Format : MoMoDDHHMM (Mo = month, M = minute)
+
+    date_time_end : str
+        Ending date & time. Must be after date_time_start
+        Format : MoMoDDHHMM (Mo = month, M = minute)
+
+    Returns
+    -------
+    times : list of str
+        List containing the datetime strings occuring between date_time_start
+        & date_time_end (inclusive)
     """
+                    # J   F   M   A   M   J   J   A   S   O   N   D
+                    # 1   2   3   4   5   6   7   8   9   10  11  12
+                    # 0   1   2   3   4   5   6   7   8   9   10  11
+    days_per_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+
+    times = []
+
+    curr = date_time_start
+
+    while (curr != date_time_end):
+
+        times.append(curr)
+
+        month = curr[:2]
+        day = curr[2:4]
+        hr = curr[4:6]
+        mins = int(curr[6:8])
+
+        mins += 1
+
+        if (mins > 59):
+            mins = 0
+            hr = int(hr)
+            hr += 1
+
+            if (hr > 23):
+                hr = 0
+                day = int(day)
+                day += 1
+
+                if (day > days_per_month[month - 1]):
+                    day = 1
+                    month = int(month)
+                    month += 1
+                    month = str(month)
+                    month = padding_zero(month, 10)
+                day = padding_zero(day, 10)
+            hr = padding_zero(hr, 10)
+        mins = padding_zero(mins, 10)
+
+        curr = month + day + hr + mins
+
+    times.append(date_time_end)
+
+    return times
 
 
 
