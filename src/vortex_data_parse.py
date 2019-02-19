@@ -160,8 +160,9 @@ def get_vdm(date, time, storm_name, octant = 'REPNT2'):
     try:
         df = pd.read_html(url, skiprows=[0,1,2,3,4,5,6,7,8,9], index_col=0)[0]
 
-    except Exception:
-        return -1
+    except Exception as e:
+        print(e)
+        sys.exit(0)
 
     else:
         fnames = [f for f in df.iloc[:,0].tolist() if str(f) != 'nan']
@@ -185,7 +186,6 @@ def get_vdm(date, time, storm_name, octant = 'REPNT2'):
                     min_indx = i
                 i += 1
 
-
             # Read the VDM
             fname = files[min_indx]
             try:
@@ -197,7 +197,7 @@ def get_vdm(date, time, storm_name, octant = 'REPNT2'):
             except Exception as e:
                 print("Error fetching file from url in get_vdm_fnames")
                 print(e)
-                return -1
+                sys.exit(0)
 
             else:
                # USAF HDBO files have to extra lines at the end containing "$$"
@@ -304,7 +304,9 @@ def vdm_df(date_time_start, date_time_end, storm_name, octant = 'REPNT2'):
         df = pd.read_html(url, skiprows=[0,1,2,3,4,5,6,7,8,9], index_col=0)[0]
 
     except Exception:
-        return -1
+        print("Error reading url in vdm_df")
+        print(e)
+        sys.exit(0)
 
     else:
         fnames = [f for f in df.iloc[:,0].tolist() if str(f) != 'nan']
@@ -319,10 +321,15 @@ def vdm_df(date_time_start, date_time_end, storm_name, octant = 'REPNT2'):
         files2 = list(filter(regex2.search, fnames))
 
         files = files1 + files2
-        #print(files)
+
         files = [x for x in files if (int(x[12:24]) <= date_time_end_int and
                                       int(x[12:24]) >= date_time_start_int)]
-        #print(files)
+
+        if (not files):
+            print('Oops! No vortex data messages published between ' + date_time_start
+                    + ' and ' + date_time_start)
+            sys.exit(0)
+
         data_list = []
         for x in files:
             url = BASE_URL + year_start + "/" + octant + "/" + x
@@ -337,7 +344,7 @@ def vdm_df(date_time_start, date_time_end, storm_name, octant = 'REPNT2'):
             except Exception as e:
                 print("Error fetching file from url in get_vdm_fnames")
                 print(e)
-                return -1
+                sys.exit(0)
 
             else:
                print(x)     # Leave this in as a progress indicator
@@ -355,7 +362,7 @@ def vdm_df(date_time_start, date_time_end, storm_name, octant = 'REPNT2'):
                        date = month + date_time[0]
                        time = date_time[2].split(':')
                        min_hr = time[0] + time[1]
-                       curr_list.append(int(date + min_hr))     # Date time
+                       curr_list.append(date + min_hr)     # Date time
 
                        coords = data[5].split(' ')
                        curr_list.append(coords[1] + coords[3])  # lat
@@ -379,7 +386,7 @@ def vdm_df(date_time_start, date_time_end, storm_name, octant = 'REPNT2'):
                        date = month + date_time[0]
                        time = date_time[1].split(':')
                        min_hr = time[0] + time[1]
-                       curr_list.append(int(date + min_hr))     # Date time
+                       curr_list.append(date + min_hr)     # Date time
 
                        lats = data[5].split(' ')
                        lat = dec_2_deg(lats[1] + '.' + lats[3])
