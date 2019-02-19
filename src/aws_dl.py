@@ -305,7 +305,7 @@ def abi_dl(date_lst, sector):
     date_lst : list of str
         List of the dates & times of the desired files, in a 1-hr block.
         Format: YYYYMMDDHH
-        
+
     sector : str
         Sector of the GOES-16 imagery to download. "M1" -> mesoscale 1,
         "M2" -> mesoscale 2, "C" -> CONUS
