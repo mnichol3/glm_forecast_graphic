@@ -52,6 +52,7 @@ def padding_zero(int_to_pad, lim):
     ------------
     int_to_pad : int
         The integer to add padding/leading zero to, if needed
+
     lim : int
         Used to check to see if the param int needs a padding zero added to it.
         Ex:
@@ -85,6 +86,7 @@ def date_time_chunk(start_date_time, end_date_time):
     ------------
     start_date_time : str
         Beginning of the date_time chunk. Format: YYYYMMDDHH or YYYYMMDDHHMM
+
     end_date_time : str
         End of the date_time chunk. Format: YYYYMMDDHH or YYYYMMDDHHMM
 
@@ -303,6 +305,7 @@ def abi_dl(date_lst, sector):
     date_lst : list of str
         List of the dates & times of the desired files, in a 1-hr block.
         Format: YYYYMMDDHH
+        
     sector : str
         Sector of the GOES-16 imagery to download. "M1" -> mesoscale 1,
         "M2" -> mesoscale 2, "C" -> CONUS

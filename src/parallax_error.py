@@ -72,6 +72,7 @@ def calc_proj_param(R, H):
     ------------
     R : int
         Radius of the the Earth, in km
+
     H : int
         Satellite's height above the Earth's surface, in km
 
@@ -95,6 +96,7 @@ def calc_ssp_dist(lon, lat):
     ------------
     lon : float
         Longitude coordinate, in decimal degrees
+
     lat : float
         Latitude coordinate, in decimal degrees
 
@@ -119,8 +121,10 @@ def corrected_proj_param(big_H, lil_h, R):
     ------------
     big_H : int
         Satellite's height above the Earth's surface, in km
+
     lil_h : int
         Cloud's altitude above the Earth's surface, in km
+
     R : int
         Earth's radius, in km
 
@@ -144,10 +148,13 @@ def lin_parallaxE(ups, lil_h, R, P):
     ------------
     ups : float
         The SSP distance angle, in degrees
+
     lil_h : int/float
         The cloud's altitude above the Earth's surface, in km
+
     R : int
         Earth's radius, in km
+
     P : float
         Satellite projection parameter
 
@@ -173,12 +180,16 @@ def parallaxE_lon_lat(lon, lat, lil_h, P, R):
     ------------
     lon : float
         Longitude coordinate of the elevated target, in decimal degrees
+
     lat : float
         Latitude coordinate of the elevated target, in decimal degrees
+
     lil_h : int/float
         Altitude of the elevated target above the Earth's surface
+
     P : float
         Satellite's projection parameter
+
     R : int
         Earth's radius, in km
 
@@ -212,10 +223,13 @@ def lin_parallaxE_lon_lat(delta_ups, ups, lon, lat):
     ------------
     delta_ups : float
         Parallax error, in km
+
     ups : float
         SSP distance angle, in degrees
+
     lon : float
         Elevated target's longitude coordinate, in degrees
+
     lat : float
         Elevated target's latitude coordinate, in degrees
 
@@ -240,6 +254,7 @@ def parallaxE_dist(delta_ups, R):
     ------------
     delta_ups : float
         Angular parallax error, in degrees
+        
     R : int
         Earth's radius, in km
 

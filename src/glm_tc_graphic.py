@@ -391,8 +391,10 @@ def geodesic_point_buffer(lat, lon, km):
     ------------
     lat : float
         Latitude coordinate of the circle's center
+
     lon : float
         Longitude coordinate of the circle's center
+        
     km : int
         Radius of the circle, in km
 

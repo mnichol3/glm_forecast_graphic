@@ -121,10 +121,13 @@ def get_vdm(date, time, storm_name, octant = 'REPNT2'):
     ------------
     date : str
         Date the observation was taken
+
     time : str
         Time the observation was taken
+
     storm_name : str
         Name of the storm the observation was taken in
+
     octant : str
         Octant that the obs was taken within. Default is REPNT2
 
@@ -241,10 +244,13 @@ def vdm_df(date_time_start, date_time_end, storm_name, octant = 'REPNT2'):
     ------------
     date_time_start : str
         Starting date & time of VDMs
+
     date_time_end : str
         Ending date & time of VDMs
+
     storm_name : str
         Name of the storm the VDMs were taken in
+
     octant : str
         Octant the VDMs were taken in
 
