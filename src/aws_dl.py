@@ -120,20 +120,22 @@ def date_time_chunk(start_date_time, end_date_time):
         if (curr_hour > 23):
             curr_hour = 0
             curr_day += 1
-            if (curr_day > 30):
-                if (days_per_month[curr_month - 1] == 30):
-                    curr_day = 1
-                    curr_month += 1
+            if (curr_day == 31 and days_per_month[curr_month - 1] == 30):
+                curr_day = 1
+                curr_month += 1
+            elif (curr_day == 32 and days_per_month[curr_month - 1] == 31):
+                curr_day = 1
+                curr_month += 1
             elif (curr_day > 28 and curr_month == 2):
                 if (curr_year not in leap_years):
                     curr_day = 1
                     curr_month += 1
                 elif (curr_day > 29):
-                    curr_day = 0
+                    curr_day = 1
                     curr_month += 1
 
         if (curr_month > 12):
-            curr_month = 0
+            curr_month = 1
             curr_year += 1
 
         curr_year = str(curr_year)
@@ -145,7 +147,7 @@ def date_time_chunk(start_date_time, end_date_time):
         curr_date_time = curr_year + curr_month + curr_day + curr_hour
 
         curr_date_time_mins = curr_date_time + '00'
-
+        
         chunks.append(curr_date_time_mins)
 
     return chunks
