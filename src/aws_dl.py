@@ -395,3 +395,7 @@ def abi_dl(date_lst, sector):
             writer.writerow([x])
     '''
     return abi_fnames
+
+
+if __name__ == '__main__':
+    print('glm_forecast_graphic: Calling module <aws_dl> as main...')

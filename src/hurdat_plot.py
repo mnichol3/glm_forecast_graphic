@@ -96,3 +96,7 @@ def make_plot(fname_hurdat):
     plt.show()
 
     plt.savefig('filename1.png')
+
+
+if __name__ == '__main__':
+    print('glm_forecast_graphic: Calling module <hurdat_plot> as main...')

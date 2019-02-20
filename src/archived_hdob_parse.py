@@ -37,7 +37,8 @@ from matplotlib.colors import LinearSegmentedColormap
 from matplotlib import cm
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 import math
-from . import manager as mg
+#from .
+import manager as mg
 
 BASE_URL = 'https://www.nhc.noaa.gov/archive/recon/'
 PATH_LINUX = '/home/mnichol3/Documents/senior-rsch/data/hdob'
@@ -569,3 +570,6 @@ def plot_flight(fname_dict):
         plt.tight_layout()
 
         plt.show()
+
+if __name__ == '__main__':
+    print('glm_forecast_graphic: Calling module <archived_hdob_parse> as main...')

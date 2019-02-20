@@ -247,3 +247,7 @@ def abi_dl(date, sector):
     sys.stdout.flush()
 
     return abi_fnames
+
+
+if __name__ == '__main__':
+    print('glm_forecast_graphic: Calling module <aws_bucket> as main...')

@@ -82,3 +82,6 @@ def make_plot():
 
     plt.show()
     '''
+
+if __name__ == '__main__':
+    print('glm_forecast_graphic: Calling module <plot_intensity> as main...')

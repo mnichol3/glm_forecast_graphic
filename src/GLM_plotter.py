@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 from cartopy.feature import NaturalEarthFeature
 from .aws_dl import glm_dl, calc_julian_day
+from aws_dl import glm_dl, calc_julian_day
 import sys
 from os import listdir
 from os.path import isfile, join
@@ -143,3 +144,7 @@ def plot_data(data):
                 transform=ccrs.PlateCarree())
 
     plt.show()
+
+
+if __name__ == '__main__':
+    print('glm_forecast_graphic: Calling module <GLM_plotter> as main...')

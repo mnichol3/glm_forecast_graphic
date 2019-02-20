@@ -9,9 +9,12 @@ gather the glm, abi, & acft data, and make the necessary function calls to
 produce the output
 """
 
-from . import aws_dl
-from . import GLM_plotter
-from . import vortex_data_parse as vdp
+#from . import aws_dl
+#from . import GLM_plotter
+#from . import vortex_data_parse as vdp
+import aws_dl
+import GLM_plotter
+import vortex_data_parse as vdp
 import sys
 from os import listdir
 from os.path import isfile, join
@@ -185,4 +188,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    #main()
+    print('glm_forecast_graphic: Calling module <manager> as main...')

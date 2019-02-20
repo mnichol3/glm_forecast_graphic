@@ -254,7 +254,7 @@ def parallaxE_dist(delta_ups, R):
     ------------
     delta_ups : float
         Angular parallax error, in degrees
-        
+
     R : int
         Earth's radius, in km
 
@@ -286,7 +286,7 @@ def calc_lon(lon):
     return lon + 75.2
 
 
-
+"""
 cent_lat = 29.93
 cent_lon = -71.35
 
@@ -296,3 +296,6 @@ ups = calc_ssp_dist(cent_lon, cent_lat)
 #print(parallaxE_dist(delta_ups,R))
 err = parallaxE_lon_lat(calc_lon(-71.35), 29.93, 14, P, R)
 print(parallaxE_dist(err, R))
+"""
+if __name__ == '__main__':
+    print('glm_forecast_graphic: Calling module <parallax_error> as main...')

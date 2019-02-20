@@ -39,7 +39,8 @@ from shapely.ops import transform
 from shapely.geometry import Point
 from matplotlib.patches import Polygon
 from functools import partial
-from .GLM_plotter import accumulate_data
+#from .GLM_plotter import accumulate_data
+from GLM_plotter import accumulate_data
 
 
 
@@ -411,7 +412,8 @@ def geodesic_point_buffer(lat, lon, km):
 
 
 if __name__ == '__main__':
-    data_dict = read_file()
+    #data_dict = read_file()
     #print(georeference(data_dict))
-    plot_mercator(data_dict)
+    #plot_mercator(data_dict)
     #plot_geos(data_dict)
+    print('glm_forecast_graphic: Calling module <GOES16Netcdf> as main...')
