@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 from cartopy.feature import NaturalEarthFeature
-from .aws_dl import glm_dl, calc_julian_day
+#from .aws_dl import glm_dl, calc_julian_day
 from aws_dl import glm_dl, calc_julian_day
 import sys
 from os import listdir
