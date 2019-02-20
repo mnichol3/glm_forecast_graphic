@@ -62,6 +62,10 @@ class TestAWS_DL(unittest.TestCase):
         self.assertEqual(self.chunk, ['201809302300', '201810010000',
             '201810010100', '201810010200'])
 
+        self.chunk = date_time_chunk('2018123123', '2019010102')
+        self.assertEqual(self.chunk, ['201812312300', '201901010000',
+            '201901010100', '201901010200'])
+
 
 
             # Test calc_julian_day()
@@ -77,6 +81,25 @@ class TestAWS_DL(unittest.TestCase):
 
         self.jd = calc_julian_day('20180101')
         self.assertEqual(self.jd, '001')
+
+        self.jd = calc_julian_day('20181231')
+        self.assertEqual(self.jd, '365')
+
+        self.jd = calc_julian_day('20180310')
+        self.assertEqual(self.jd, '069')
+
+        # Some fun with leap year cases
+        self.jd = calc_julian_day('20160201')
+        self.assertEqual(self.jd, '032')
+
+        self.jd = calc_julian_day('20160916')
+        self.assertEqual(self.jd, '260')
+
+        self.jd = calc_julian_day('20161231')
+        self.assertEqual(self.jd, '366')
+
+        self.jd = calc_julian_day('20160309')
+        self.assertEqual(self.jd, '069')
 
 
 
