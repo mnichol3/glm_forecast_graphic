@@ -12,13 +12,17 @@ glm_forecast_graphic/
 │   ├── manager.py
 │   ├── parallax_error.py
 │   ├── plot_intensity.py
-│   ├── vortex_data_parse.py
+│   └── vortex_data_parse.py
 │
 ├── tests/
 │   ├── __init__.py
 │   └── test-1.py
 │
+├── lib/
+│   └── env.yml
+│
+├── __init__.py
 ├── .gitignore
 ├── LICENSE
 ├── README.md
-└── __init__.py
+└── structure.py

@@ -15,8 +15,8 @@ import re
 import os
 import sys
 import numpy as np
-#from .aws_dl import padding_zero
-from aws_dl import padding_zero
+from .aws_dl import padding_zero
+#from aws_dl import padding_zero
 
 
 BASE_URL = 'https://www.nhc.noaa.gov/archive/recon/'
@@ -162,11 +162,12 @@ def dec_2_deg(coord):
     deg = float(splt[0]) + dec
 
     if (len(coord) > 5):    # Implies we're dealing with a longitude coordinate
-        deg = deg * -1
+        deg_str = '-' + str(deg)
+        return deg_str[:7]
+    else:
+        return str(deg)[:6]
 
-    deg = str(deg)[:6]
-
-    return deg
+    #return deg
 
 
 
@@ -203,19 +204,26 @@ def get_vdm(date, time, storm_name, octant = 'REPNT2'):
     vdm_dict['outbnd max sfc wind b&r'] = data[16][3:]
     vdm_dict['outbnd max FL wind b&r'] = data[18][3:]
     vdm_dict['acft storm info'] = data[24][3:]
+
+    Notes
+    -----
+    * ONLY WORKS FOR 2018 VDM COORDINATE FORMAT
     """
 
     vdm_dict = {}
+    year = date[:4]
+    month = date[4:6]
+    day = date[6:]
+    url = BASE_URL + year + "/" + octant + "/"
 
     if (type(date) == int):
         print('ERROR: Date argument must be of type str')
         return -1
 
-    year = date[:4]
-    month = date[4:6]
-    day = date[6:]
-
-    url = BASE_URL + year + "/" + octant + "/"
+    if (int(year) < 2018):
+        print('ERROR: get_vdm function only works for years after 2017')
+        print('get_vdm may fail on 2018 VDMs published before June also')
+        sys.exit(0)
 
     try:
         df = pd.read_html(url, skiprows=[0,1,2,3,4,5,6,7,8,9], index_col=0)[0]
@@ -339,6 +347,12 @@ def vdm_df(date_time_start, date_time_end, storm_name, octant = 'REPNT2'):
                 F : Inbound maximum flight-level wind, incl. bearing & range
                 G : Outbound maximum flight-level wind, incl. bearing & range
                 H : Aircfraft info
+
+    Notes
+    -----
+    * USAF RPENT2 VDM's published after May 2018 have coordinates in decimal degrees
+    * USAF RPENT2 VDM's published in 2017 have coordinates in decimal minutes
+    * NOAA RPENT2 VDM's published in 2017 have coordinates in decimal minutes
 
     """
 
@@ -604,8 +618,17 @@ def lin_interp(vdm_df, interval):
 
     """
 
+
+
+
+
+
+
+
+
+
 def hello():
-    print('Hello from vortex_data_parse !')
+    return('Hello from vortex_data_parse!')
 
 if __name__ == '__main__':
     print('glm_forecast_graphic: Calling module <vortex_data_parse> as main...')

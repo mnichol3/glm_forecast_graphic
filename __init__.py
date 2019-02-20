@@ -8,4 +8,3 @@ from .src import hurdat_plot
 from .src import parallax_error
 from .src import plot_intensity
 from .src import vortex_data_parse
-from . import tests
