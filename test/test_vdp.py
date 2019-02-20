@@ -55,6 +55,7 @@ class TestVortexDataParse(unittest.TestCase):
         self.assertEqual(self.dec_2_deg, '-71.65')
 
 
+
         # Test calc_min_list
     def test_6(self):
         # Basic case
