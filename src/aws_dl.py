@@ -64,11 +64,13 @@ def padding_zero(int_to_pad, lim):
     result : str
         int_to_pad cast as a string, regardless if a padding 0 was added to it
     """
-    if (int_to_pad < lim):
-        result = '0' + str(int_to_pad)
-    else:
-        result = str(int_to_pad)
-    return result
+    str_2_pad = str(int_to_pad)
+    str_lim = str(lim)
+    while (len(str_2_pad) < len(str_lim)):
+        str_2_pad = '0' + str_2_pad
+
+    return str_2_pad
+
 
 
 
@@ -104,7 +106,7 @@ def date_time_chunk(start_date_time, end_date_time):
 
     leap_years = [2016, 2020, 2024, 2028, 2032]
 
-    chunks = [start_date_time]
+    chunks = [start_date_time + '00']
 
     curr_date_time = start_date_time
 
@@ -120,11 +122,11 @@ def date_time_chunk(start_date_time, end_date_time):
             curr_day += 1
             if (curr_day > 30):
                 if (days_per_month[curr_month - 1] == 30):
-                    curr_day = 0
+                    curr_day = 1
                     curr_month += 1
             elif (curr_day > 28 and curr_month == 2):
                 if (curr_year not in leap_years):
-                    curr_day = 0
+                    curr_day = 1
                     curr_month += 1
                 elif (curr_day > 29):
                     curr_day = 0
@@ -142,7 +144,9 @@ def date_time_chunk(start_date_time, end_date_time):
 
         curr_date_time = curr_year + curr_month + curr_day + curr_hour
 
-        chunks.append(curr_date_time)
+        curr_date_time_mins = curr_date_time + '00'
+
+        chunks.append(curr_date_time_mins)
 
     return chunks
 
