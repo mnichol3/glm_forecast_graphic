@@ -39,7 +39,7 @@ from shapely.ops import transform
 from shapely.geometry import Point
 from matplotlib.patches import Polygon
 from functools import partial
-from GLM_plotter import accumulate_data
+from .GLM_plotter import accumulate_data
 
 
 
@@ -62,7 +62,7 @@ def get_os():
     return os_type
 
 
-    
+
 def read_file():
     """
     Opens & reads a GOES-16 ABI data file, returning a dictionary of data

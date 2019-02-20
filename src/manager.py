@@ -9,9 +9,9 @@ gather the glm, abi, & acft data, and make the necessary function calls to
 produce the output
 """
 
-import aws_dl
-import GLM_plotter
-import vortex_data_parse as vdp
+from . import aws_dl
+from . import GLM_plotter
+from . import vortex_data_parse as vdp
 import sys
 from os import listdir
 from os.path import isfile, join
@@ -151,7 +151,7 @@ def get_obs_file(start_date, end_date, storm_name, obs_type, mode):
 
 
 def main():
-    
+
     #aws_dl.glm_dl(['2018091218', '2018091218'])
     #glm_data = GLM_plotter.accumulate_data(['2018091218'])
     #GLM_plotter.plot_data(glm_data)

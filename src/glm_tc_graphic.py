@@ -40,7 +40,7 @@ from shapely.ops import transform
 from shapely.geometry import Point
 from matplotlib.patches import Polygon
 from functools import partial
-from GLM_plotter import accumulate_data
+from .GLM_plotter import accumulate_data
 
 
 
@@ -394,7 +394,7 @@ def geodesic_point_buffer(lat, lon, km):
 
     lon : float
         Longitude coordinate of the circle's center
-        
+
     km : int
         Radius of the circle, in km
 

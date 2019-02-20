@@ -15,7 +15,7 @@ import re
 import os
 import sys
 import numpy as np
-from aws_dl import padding_zero
+from .aws_dl import padding_zero
 
 
 BASE_URL = 'https://www.nhc.noaa.gov/archive/recon/'
@@ -602,3 +602,5 @@ def lin_interp(vdm_df, interval):
 
 
     """
+if __name__ == '__main__':
+    print('glm_forecast_graphic: Calling module <vortex_data_parse> as main...')

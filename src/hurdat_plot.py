@@ -41,54 +41,58 @@ def mins_since(time_list):
 
 
 
-fname_hurdat = r'C:\Users\Salty Pete\Desktop\2018_Fall\Senior Research\HURDAT2-2017-IRMA.txt'
-fname_vdm = r'C:\Users\Salty Pete\Desktop\2018_Fall\Senior Research\REPNT2\2017-IRMA\VDM-IRMA-201708300000-201709130600.txt'
+#fname_hurdat = r'C:\Users\Salty Pete\Desktop\2018_Fall\Senior Research\HURDAT2-2017-IRMA.txt'
+#fname_vdm = r'C:\Users\Salty Pete\Desktop\2018_Fall\Senior Research\REPNT2\2017-IRMA\VDM-IRMA-201708300000-201709130600.txt'
 
-data = pd.read_csv(fname_hurdat, header = None, skiprows = 1, dtype = str)
+fname_hurdat = ''
+name_vdm =''
 
-# Row 6 = max sustained winds
-# Row 7 = min SLP
-dates = data[0]
-times = data[1]
+def make_plot(fname_hurdat):
+    data = pd.read_csv(fname_hurdat, header = None, skiprows = 1, dtype = str)
 
-dates = [x[4:] for x in dates]
+    # Row 6 = max sustained winds
+    # Row 7 = min SLP
+    dates = data[0]
+    times = data[1]
 
-date_times = []
-i = 0
-while (i < len(dates)):
-    curr = dates[i] + times[i][1:]
-    date_times.append(curr)
-    i += 1
+    dates = [x[4:] for x in dates]
 
-times = mins_since(date_times)
-max_winds = list(map(int, data[6]))
-min_slp = list(map(int, data[7]))
+    date_times = []
+    i = 0
+    while (i < len(dates)):
+        curr = dates[i] + times[i][1:]
+        date_times.append(curr)
+        i += 1
 
-vdm = pd.read_csv(fname_vdm, header = None, dtype = str)
-vdm_times = mins_since(vdm[0])
-vdm_mslp = list(map(int, vdm[3]))
+    times = mins_since(date_times)
+    max_winds = list(map(int, data[6]))
+    min_slp = list(map(int, data[7]))
 
-mslp_interp = np.interp(times, vdm_times, vdm_mslp)
+    vdm = pd.read_csv(fname_vdm, header = None, dtype = str)
+    vdm_times = mins_since(vdm[0])
+    vdm_mslp = list(map(int, vdm[3]))
 
-fig, ax1 = plt.subplots(figsize = (13.0, 6.5))
-ax2 = ax1.twinx()
-ax1.plot(times, max_winds, 'r^-', label = 'HURDAT2 Max Sustained Wind')
-ax1.set_title('Hurricane Irma 2017 - HURDAT2 Max Sustained Winds (red) & Min SLP (blue)')
-ax1.set_ylabel('Wind speed (knots)', color='r')
-ax1.set_xlabel('Minutes since 30 Sept 2017 0000z')
-ax1.tick_params('y', colors='r')
-#ax1.set_xticks(times[::2])
-#ax1.set_xticklabels(times[::2], rotation=45, horizontalalignment='right', fontsize=8)
+    mslp_interp = np.interp(times, vdm_times, vdm_mslp)
 
-ax2.plot(times, min_slp, 'bo-', label = 'HURDAT2 Min SLP')
-ax2.plot(times, mslp_interp, 'b^--', label = 'Interp. Acft Obs Min SLP')
-ax2.set_ylabel('Min SLP (mb)', color='b')
-ax2.tick_params('y', colors='b')
-#ax2.set_xticks(times[::2])
-#ax2.set_xticklabels(times[::2], rotation=45, horizontalalignment='right', fontsize=8)
-ax1.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
-ax2.legend(bbox_to_anchor=(1.05, 0.95), loc=2, borderaxespad=0.)
-plt.tight_layout()
-plt.show()
+    fig, ax1 = plt.subplots(figsize = (13.0, 6.5))
+    ax2 = ax1.twinx()
+    ax1.plot(times, max_winds, 'r^-', label = 'HURDAT2 Max Sustained Wind')
+    ax1.set_title('Hurricane Irma 2017 - HURDAT2 Max Sustained Winds (red) & Min SLP (blue)')
+    ax1.set_ylabel('Wind speed (knots)', color='r')
+    ax1.set_xlabel('Minutes since 30 Sept 2017 0000z')
+    ax1.tick_params('y', colors='r')
+    #ax1.set_xticks(times[::2])
+    #ax1.set_xticklabels(times[::2], rotation=45, horizontalalignment='right', fontsize=8)
 
-plt.savefig('filename1.png')
+    ax2.plot(times, min_slp, 'bo-', label = 'HURDAT2 Min SLP')
+    ax2.plot(times, mslp_interp, 'b^--', label = 'Interp. Acft Obs Min SLP')
+    ax2.set_ylabel('Min SLP (mb)', color='b')
+    ax2.tick_params('y', colors='b')
+    #ax2.set_xticks(times[::2])
+    #ax2.set_xticklabels(times[::2], rotation=45, horizontalalignment='right', fontsize=8)
+    ax1.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+    ax2.legend(bbox_to_anchor=(1.05, 0.95), loc=2, borderaxespad=0.)
+    plt.tight_layout()
+    plt.show()
+
+    plt.savefig('filename1.png')
