@@ -96,7 +96,7 @@ def calc_min_list(date_time_start, date_time_end):
                 day = int(day)
                 day += 1
 
-                if (day > days_per_month[month - 1]):
+                if (day > days_per_month[int(month) - 1]):
                     day = 1
                     month = int(month)
                     month += 1
