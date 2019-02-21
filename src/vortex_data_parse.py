@@ -601,7 +601,7 @@ def read_vdm_csv(fname):
 
 
 
-def track_interp(vdm_df):
+def track_interp(vdm_df, year):
     """
     This function takes a dataframe of accumulated VDM data and linearly
     interpolates the time and low pressure center coordinates on 1-minute
@@ -636,6 +636,8 @@ def track_interp(vdm_df):
                 G : Outbound maximum flight-level wind, incl. bearing & range
                 H : Aircfraft info
 
+    year : str
+        Year the observation was taken
 
     Returns
     -------
@@ -657,6 +659,15 @@ def track_interp(vdm_df):
 
     lats = [float(i) for i in vdm_df['B'].tolist()]
     lons = [float(j) for j in vdm_df['C'].tolist()]
+
+    min_slp = [float(k) for k in vdm_df['D'].tolist()]
+
+    fl_wind_i = vdm_df['F'].tolist()
+
+    if (year == '2018'):
+        fl_wind_o = vdm_df['H'].tolist()
+    else:
+        fl_wind_o = vdm_df['G'].tolist()
 
     """
     ['09032126', '09032245', '09032358', '09040904', '09041027', '09041142',
@@ -687,6 +698,8 @@ def track_interp(vdm_df):
     #inter_coords = zip(time_span, lat_interp, lon_interp)
 
     #return list(inter_coords)
+
+    #min_slp_interp = np.interp(time_span, delta_ts, min_slp)
 
     time_span_mins = calc_min_list(t_0, t_f, 'time_list')
 
