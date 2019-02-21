@@ -18,6 +18,7 @@ import vortex_data_parse as vdp
 import sys
 from os import listdir
 from os.path import isfile, join
+import utils
 
 PATH_LINUX = '/home/mnichol3/Documents/senior-rsch/data/'
 PATH_WIN = r'D:\Documents\senior-research-data\hdob'
@@ -182,8 +183,9 @@ def main():
     f_abs = join(fpath, fname)
     vdp_df = vdp.read_vdm_csv(f_abs)
     #print(vdp_df['A'].tolist())
-    vdp.track_interp(vdp_df)
-
+    coords = vdp.track_interp(vdp_df)
+    print(coords)
+    #utils.plot_coords(coords)
 
     #print(vdp.calc_min_list('09032126', '09032245'))
 

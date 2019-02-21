@@ -65,7 +65,7 @@ def calc_min_list(date_time_start, date_time_end, mode='time_list'):
 
         mode = 'time_list' --> A list of datetime strings occuring between
                                date_time_start & date_time_end (inclusive) will
-                               be returned
+                               be returned, in 1-minute increments
 
         mode = 'tot_mins' --> An int representing the total minutes from
                               date_time_start to date_time_end (inclusive)
@@ -80,7 +80,12 @@ def calc_min_list(date_time_start, date_time_end, mode='time_list'):
 
     tot_mins : int
         An int representing the total minutes from date_time_start to date_time_end
-        (inclusive)
+        (inclusive). Counting starts at 1 (date_time_start = minute 1)
+
+    Notes
+    -----
+    Could just return len(times) instead of tot_mins, but that would take up
+    a lot of memory for no reason
 
     """
                     # J   F   M   A   M   J   J   A   S   O   N   D
@@ -137,7 +142,7 @@ def calc_min_list(date_time_start, date_time_end, mode='time_list'):
         times.append(date_time_end)
         return times
     else:
-        #tot_mins += 1
+        tot_mins += 1
         return tot_mins
 
 
@@ -679,8 +684,26 @@ def track_interp(vdm_df):
     lat_interp = np.interp(time_span, delta_ts, lats)
     lon_interp = np.interp(time_span, delta_ts, lons)
 
-    for pos in zip(time_span, lat_interp, lon_interp):
-        print(pos)
+    #inter_coords = zip(time_span, lat_interp, lon_interp)
+
+    #return list(inter_coords)
+
+    time_span_mins = calc_min_list(t_0, t_f, 'time_list')
+
+    """
+    print('time_span len: ' + str(len(time_span)))
+    print('time_span_mins len: ' + str(len(time_span_mins)))
+    print('lons len: ' + str(len(lon_interp)))
+    print('lats len: ' + str(len(lat_interp)))
+    """
+
+    processed_vdm = pd.DataFrame({'date_time': time_span_mins,
+                                  'time_span': time_span,
+                                  'lons': lon_interp,
+                                  'lats': lat_interp
+    })
+
+    return processed_vdm
 
 
 
