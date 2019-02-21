@@ -9,12 +9,12 @@ gather the glm, abi, & acft data, and make the necessary function calls to
 produce the output
 """
 
-from . import aws_dl
-from . import GLM_plotter
-from . import vortex_data_parse as vdp
+#from . import aws_dl
+#from . import GLM_plotter
+#from . import vortex_data_parse as vdp
 #import aws_dl
 #import GLM_plotter
-#import vortex_data_parse as vdp
+import vortex_data_parse as vdp
 import sys
 from os import listdir
 from os.path import isfile, join
@@ -171,7 +171,7 @@ def main():
     #print(vdm_dict)
     #vdp.vdm_df('201708300000', '201709130600', 'irma')
 
-    '''
+
     year = '2017'
     storm_name = 'IRMA'
     start_date = '20170830'
@@ -180,13 +180,15 @@ def main():
     fname = f_info[0]
     fpath = f_info[1]
     f_abs = join(fpath, fname)
-    print(vdp.read_vdm_csv(f_abs))
-    '''
+    vdp_df = vdp.read_vdm_csv(f_abs)
+    #print(vdp_df['A'].tolist())
+    vdp.track_interp(vdp_df)
+
 
     #print(vdp.calc_min_list('09032126', '09032245'))
 
 
 
 if __name__ == "__main__":
-    #main()
-    print('glm_forecast_graphic: Calling module <manager> as main...')
+    main()
+    #print('glm_forecast_graphic: Calling module <manager> as main...')

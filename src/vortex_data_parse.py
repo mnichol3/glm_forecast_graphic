@@ -15,8 +15,8 @@ import re
 import os
 import sys
 import numpy as np
-from .aws_dl import padding_zero
-#from aws_dl import padding_zero
+#from .aws_dl import padding_zero
+from aws_dl import padding_zero
 
 
 BASE_URL = 'https://www.nhc.noaa.gov/archive/recon/'
@@ -44,7 +44,7 @@ def get_os():
 
 
 
-def calc_min_list(date_time_start, date_time_end):
+def calc_min_list(date_time_start, date_time_end, mode='time_list'):
     """
     Returns a list of datetime strings for every minute between date_time_start
     & date_time_end (inclusive)
@@ -60,11 +60,28 @@ def calc_min_list(date_time_start, date_time_end):
         Ending date & time. Must be after date_time_start
         Format : MoMoDDHHMM (Mo = month, M = minute)
 
+    mode : str
+        String indicating what to return.
+
+        mode = 'time_list' --> A list of datetime strings occuring between
+                               date_time_start & date_time_end (inclusive) will
+                               be returned
+
+        mode = 'tot_mins' --> An int representing the total minutes from
+                              date_time_start to date_time_end (inclusive)
+                              will be returned
     Returns
     -------
     times : list of str
         List containing the datetime strings occuring between date_time_start
         & date_time_end (inclusive)
+
+    OR
+
+    tot_mins : int
+        An int representing the total minutes from date_time_start to date_time_end
+        (inclusive)
+
     """
                     # J   F   M   A   M   J   J   A   S   O   N   D
                     # 1   2   3   4   5   6   7   8   9   10  11  12
@@ -72,12 +89,20 @@ def calc_min_list(date_time_start, date_time_end):
     days_per_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
     times = []
+    tot_mins = 0
 
     curr = date_time_start
 
     while (curr != date_time_end):
 
-        times.append(curr)
+        # Not very efficient but saves memory
+        if (mode == 'time_list'):
+            times.append(curr)
+        elif (mode == 'tot_mins'):
+            tot_mins += 1
+        else:
+            print('ERROR: Invalid mode argument (vortex_data_parse.calc_min_list)')
+            sys.exit(0)
 
         month = curr[:2]
         day = curr[2:4]
@@ -108,9 +133,12 @@ def calc_min_list(date_time_start, date_time_end):
 
         curr = month + day + hr + mins
 
-    times.append(date_time_end)
-
-    return times
+    if (mode == 'time_list'):
+        times.append(date_time_end)
+        return times
+    else:
+        #tot_mins += 1
+        return tot_mins
 
 
 
@@ -561,18 +589,19 @@ def read_vdm_csv(fname):
     else:
         col_names = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 
-    vdm_df = pd.read_csv(fname, sep=",", header=None)
+    vdm_df = pd.read_csv(fname, sep=",", header=None, dtype=str)
     vdm_df.columns = col_names
 
     return vdm_df
 
 
 
-def lin_interp(vdm_df, interval):
+def track_interp(vdm_df):
     """
     This function takes a dataframe of accumulated VDM data and linearly
-    interpolates the time and low pressure center coordinates on 5-minute
-    intervals
+    interpolates the time and low pressure center coordinates on 1-minute
+    intervals. The times used are measured as minutes since the first published
+    observation for that storm
 
     Parameters
     ----------
@@ -602,9 +631,6 @@ def lin_interp(vdm_df, interval):
                 G : Outbound maximum flight-level wind, incl. bearing & range
                 H : Aircfraft info
 
-    interval : int
-        Interval at which to linearly interpolate the data, in minutes.
-        Ex: interval = 5 --> data will be interpolated to 5 min intervals
 
     Returns
     -------
@@ -617,6 +643,45 @@ def lin_interp(vdm_df, interval):
 
 
     """
+    delta_ts = []
+
+    obs_times = vdm_df['A'].tolist()
+
+    t_0 = obs_times[0]  # '09032126'
+    t_f = obs_times[-1] # '09102038'
+
+    lats = [float(i) for i in vdm_df['B'].tolist()]
+    lons = [float(j) for j in vdm_df['C'].tolist()]
+
+    """
+    ['09032126', '09032245', '09032358', '09040904', '09041027', '09041142',
+    '09041313', '09041652', '09041836', '09042140', '09042307', '09042323',
+    '09050020', '09050112', '09050149', '09050259', '09050437', '09050943',
+    '09051110', '09051119', '09051231', '09051302', '09051302', '09051449',
+    '09051638', '09052138', '09052245', '09052318', '09060003', '09060108',
+    '09060120', '09060153', '09060311', '09060503', '09061136', '09061439',
+    '09061626', '09061816', '09062017', '09070000', '09070113', '09070301',
+    '09070509', '09071112', '09071228', '09071411', '09071556', '09071715',
+    '09072333', '09080055', '09080235', '09080424', '09080501', '09080937',
+    '09081136', '09081250', '09081320', '09081437', '09081638', '09082113',
+    '09082234', '09082352', '09090136', '09090251', '09090511', '09090838',
+    '09091012', '09091154', '09091402', '09091830', '09092006', '09092143',
+    '09092306', '09100236', '09100412', '09100542', '09100725', '09100856',
+    '09101203', '09101341', '09101506', '09101714', '09102038']
+    """
+
+    # Determine the time between t_0 and each of the other obs, in minutes
+    for x in obs_times:
+        delta_ts.append(calc_min_list(t_0, x, 'tot_mins'))
+
+    time_span = np.arange(0, delta_ts[-1])
+
+    lat_interp = np.interp(time_span, delta_ts, lats)
+    lon_interp = np.interp(time_span, delta_ts, lons)
+
+    for pos in zip(time_span, lat_interp, lon_interp):
+        print(pos)
+
 
 
 
