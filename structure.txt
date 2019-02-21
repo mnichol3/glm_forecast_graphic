@@ -11,18 +11,19 @@ glm_forecast_graphic/
 │   ├── hurdat_plot.py
 │   ├── manager.py
 │   ├── parallax_error.py
-│   ├── plot_intensity.py
+│   ├── utils.py
 │   └── vortex_data_parse.py
 │
 ├── tests/
 │   ├── __init__.py
-│   └── test-1.py
+│   ├── test_aws_dl.py
+│   └── test_vdm.py
 │
 ├── lib/
 │   └── env.yml
 │
 ├── __init__.py
 ├── .gitignore
-├── LICENSE
+├── LICENSE.md
 ├── README.md
-└── structure.py
+└── structure.txt
