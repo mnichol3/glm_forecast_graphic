@@ -96,7 +96,7 @@ def read_file():
 
     # TODO : add the test file to linux folder
     if (get_os() == 'linux'):
-        file = '/home/mnichol3/Documents/senior-rsch/data/abi'
+        file = '/home/mnichol3/Documents/senior-rsch/data/abi/20180912_1457z_Meso1_Ch1.nc'
     else:
         file = r"C:\Users\Salty Pete\Desktop\2018_Fall\Senior Research\20180912_1457z_Meso1_Ch1.nc"
 
