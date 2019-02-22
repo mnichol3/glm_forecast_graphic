@@ -346,8 +346,7 @@ def glm_dl(date_lst):
             try:
                 kwargs['ContinuationToken'] = resp['NextContinuationToken']
             except KeyError:
-                print('ERROR: Key error (aws_dl.glm_dl)')
-                sys.exit(0)
+                break # LEAVE AS A BREAK !!!!!!!
 
         for x in keys:
 
@@ -451,8 +450,7 @@ def abi_dl_multi(date_lst, sector):
             try:
                 kwargs['ContinuationToken'] = resp['NextContinuationToken']
             except KeyError:
-                print('ERROR: Key error (aws_dl.abi_dl_multi)')
-                sys.exit(0)
+                break # LEAVE AS A BREAK !!!!!!!
 
         for x in keys:
 
@@ -540,12 +538,12 @@ def abi_dl(date_time, sector):
         sys.exit(0)
 
 
-    year = date[:4]
-    month = date[4:6]
-    day = date[6:8]
-    hour = date[8:10]
-    mins = date[-2:]
-    julian_day = calc_julian_day(date)
+    year = date_time[:4]
+    month = date_time[4:6]
+    day = date_time[6:8]
+    hour = date_time[8:10]
+    mins = date_time[-2:]
+    julian_day = calc_julian_day(date_time)
 
     prefix = 'ABI-L1b-RadM/' + year + '/' + julian_day + '/' + hour + '/OR_ABI-L1b-Rad' + sector_prefix + '-M3C01_G16'
     suffix = ''
@@ -561,8 +559,7 @@ def abi_dl(date_time, sector):
         try:
             kwargs['ContinuationToken'] = resp['NextContinuationToken']
         except KeyError:
-            print('ERROR: Key error (aws_dl.abi_dl)')
-            sys.exit(0)
+            break # LEAVE AS A BREAK !!!!!!!
 
     while (not success and tries < 120):
         for x in keys:
