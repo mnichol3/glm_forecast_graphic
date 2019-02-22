@@ -321,7 +321,7 @@ def explore_aws_abi(date_time, sector):
     prefix = 'ABI-L1b-RadM/' + year + '/' + julian_day + '/' + hour + '/OR_ABI-L1b-Rad' + sector_prefix + '-M3C01_G16'
     suffix = ''
     kwargs = {'Bucket': 'noaa-goes16', 'Prefix': prefix}
-
+    print(prefix)
     while True:
         resp = s3.list_objects_v2(**kwargs)
         for obj in resp['Contents']:
@@ -334,6 +334,8 @@ def explore_aws_abi(date_time, sector):
         except KeyError:
             break
 
+    print(keys[0])
+    """
     for x in keys:
 
         #fname_match = re.search('e(\d{11})', x) # Matches scan end date time
@@ -345,6 +347,7 @@ def explore_aws_abi(date_time, sector):
             local_fname = year + month + day + fname[-7:-3] + '.nc'
             print(fname)
             print(local_fname)
+    """
 
 
 

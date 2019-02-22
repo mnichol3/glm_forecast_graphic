@@ -12,7 +12,7 @@ produce the output
 #from . import aws_dl
 #from . import GLM_plotter
 #from . import vortex_data_parse as vdp
-#import aws_dl
+import aws_dl
 #import GLM_plotter
 import vortex_data_parse as vdp
 import sys
@@ -183,10 +183,11 @@ def main():
     f_abs = join(fpath, fname)
     vdp_df = vdp.read_vdm_csv(f_abs)
     #print(vdp_df['A'].tolist())
-    coords = vdp.track_interp(vdp_df)
-    print(coords)
-    #utils.plot_coords(coords)
+    #coords = vdp.track_interp(vdp_df)
+    #print(coords)
 
+    aws_dl.abi_dl('201809121257', 'meso1')
+    #print(aws_dl.calc_julian_day('201809121257'))
     #print(vdp.calc_min_list('09032126', '09032245'))
 
 
