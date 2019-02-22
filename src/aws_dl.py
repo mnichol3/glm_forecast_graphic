@@ -10,6 +10,37 @@ Web Service (AWS) bucket.
 
 Code that deals with AWS adapted from Alex Chan's code found here
 -> https://alexwlchan.net/2017/07/listing-s3-keys/
+
+--------------------------------------------------------------------------------
+NOAA AWS ABI file format:
+
+OR_ABI-L2-MCMIPC-M3_G16_sYYYYJJJHHMMSST_eYYYYJJJHHMMSST_cYYYYJJJHHMMSST.nc
+
+Where:
+    OR      : Indicates the system is operational
+    ABI     : Instrument type (Advanced Baseline Imager, in this case)
+    L2      : Indicated Level 2 data
+    MCMIP   : Multi-channel Cloud and Moisture Imagery Product
+    C       : Indicates CONUS file
+    M3      : Scan mode
+    G16     : Indicates satellite (GOES-16 in this case)
+    s#####  : Scan start date & time
+    e#####  : Scane end date & time
+    c#####  : File creation date & time
+
+    ** Filename date & time formats:
+    YYYY : Year
+    JJJ  : Julian day
+    HH   : Hour, in 23-hr format with leading zero if < 10
+    MM   : Minutes, with leading zero if < 10
+    SS   : Seconds, with leading zero if < 10
+    T    : Tenth second, no leading zero or decimal
+
+Ex:
+OR_ABI-L2-MCMIPC-M3_G16_s20181781922189_e20181781924562_c20181781925075.nc
+Scan start      : 2018 178 19:22:18:9
+Scan end        : 2018 178 19:24:56:2
+File created    : 2018 178 19:25:07:5
 """
 
 
@@ -147,10 +178,58 @@ def date_time_chunk(start_date_time, end_date_time):
         curr_date_time = curr_year + curr_month + curr_day + curr_hour
 
         curr_date_time_mins = curr_date_time + '00'
-        
+
         chunks.append(curr_date_time_mins)
 
     return chunks
+
+
+
+def dec_min(date_time):
+    """
+    Decreases the minute of date_time and adjusts the hour and julian day
+    if needed
+
+    Parameters
+    ----------
+    date_time : str
+        Date_time to be adjusted.
+        Format: YYYYJdJdJdHHMM, where:
+            YYYY   : Year
+            JdJdJd : 3-digit julian day
+            HH     : Hours
+            MM     : Minutes
+
+    Returns
+    -------
+    adj_dt : str
+        Adjusted date_time string
+
+    """
+    month = date_time[:2]
+    day = date_time[4:7]
+    hr = date_time[7:9]
+    mins = int(date_time[-2:])
+
+    mins -= 1
+
+    if (mins < 0):
+        mins = 0
+        hr = int(hr)
+        hr -= 1
+
+        if (hr < 0):
+            hr = 0
+            day = int(day)
+            day -= 1
+
+            day = padding_zero(day, 10)
+        hr = padding_zero(hr, 10)
+    mins = padding_zero(mins, 10)
+
+    adj_dt = month + day + hr + mins
+
+    return adj_dt
 
 
 
@@ -267,15 +346,18 @@ def glm_dl(date_lst):
             try:
                 kwargs['ContinuationToken'] = resp['NextContinuationToken']
             except KeyError:
-                break
+                print('ERROR: Key error (aws_dl.glm_dl)')
+                sys.exit(0)
 
         for x in keys:
 
-            fname_match = re.search('s(\d{14})', x)
+            fname_match = re.search('e(\d{14})', x) # Matches scan end date time
 
             if (fname_match):
+                # Filename with month & day as julian day
                 fname = fname_match[1] + '.nc'
-                local_fname = year + month + day + hour + fname[-8:-3] + '.nc'
+                # Filename with month & day as month & day
+                local_fname = year + month + day + fname[-8:-3] + '.nc'
                 try:
                     sys.stdout.write("\rDownloading GLM datafile: {}".format(local_fname))
                     s3.download_file('noaa-goes16', x, os.path.join(path, local_fname))
@@ -302,7 +384,7 @@ def glm_dl(date_lst):
 
 
 
-def abi_dl(date_lst, sector):
+def abi_dl_multi(date_lst, sector):
     """
     Downlad GOES-16 ABI data files from NOAA's Amazon AWS server
 
@@ -328,7 +410,7 @@ def abi_dl(date_lst, sector):
     if (get_os() == 'linux'):
         path = '/home/mnichol3/Documents/senior-rsch/data/abi'
     else:
-        path = 'D:\Documents\senior-research-data\glm'
+        path = 'D:\Documents\senior-research-data\abi'
 
     # Make sure we have a list
     if (type(date_lst) == str):
@@ -337,10 +419,8 @@ def abi_dl(date_lst, sector):
     s3 = boto3.client('s3')
     s3.meta.events.register('choose-signer.s3.*', disable_signing)
 
-    keys = []
     # RadM1 for Meso sector 1
     # RadM2 for Meso sector 2
-
     if (sector == 'meso1'):
         sector_prefix = 'M1'
     elif (sector == 'meso2'):
@@ -349,12 +429,14 @@ def abi_dl(date_lst, sector):
         sector_prefix = 'C'
     else:
         print('Error: Invalid sector parameter!')
-        return
+        sys.exit(0)
+
     for date in date_lst:
         year = date[:4]
         hour = date[-2:]
         julian_day = calc_julian_day(date)
 
+        keys = []
         prefix = 'ABI-L1b-RadM/' + year + '/' + julian_day + '/' + hour + '/OR_ABI-L1b-Rad' + sector_prefix + '-M3C01_G16'
         suffix = ''
         kwargs = {'Bucket': 'noaa-goes16', 'Prefix': prefix}
@@ -369,15 +451,16 @@ def abi_dl(date_lst, sector):
             try:
                 kwargs['ContinuationToken'] = resp['NextContinuationToken']
             except KeyError:
-                break
+                print('ERROR: Key error (aws_dl.abi_dl_multi)')
+                sys.exit(0)
 
         for x in keys:
 
-            fname_match = re.search('s(\d{11})', x)
+            fname_match = re.search('e(\d{11})', x) # Matches scan end date time
 
             if (fname_match):
                 fname = fname_match[1] + '.nc'
-                local_fname = year + month + day + hour + fname[-8:-3] + '.nc'
+                local_fname = year + month + day + hour + fname[-7:-3] + '.nc'
                 try:
                     sys.stdout.write("\rDownloading ABI datafile: {}".format(fname))
                     s3.download_file('noaa-goes16', x, os.path.join(path, local_fname))
@@ -389,6 +472,7 @@ def abi_dl(date_lst, sector):
                         print("The file does not exist in this AWS bucket.")
                     else:
                         print("Error downloading file from AWS")
+                    sys.exit(0)
 
     sys.stdout.write("\rFinished! Files downloaded: {}              ".format(dl_count))
     sys.stdout.flush()
@@ -401,6 +485,127 @@ def abi_dl(date_lst, sector):
             writer.writerow([x])
     '''
     return abi_fnames
+
+
+
+def abi_dl(date_time, sector):
+    """
+    Downlad GOES-16 ABI data files from NOAA's Amazon AWS server
+
+    Parameters
+    ------------
+    date_time : str
+        Date time of the desired file
+        Format: YYYYMMDDHHMM
+
+    sector : str
+        Sector of the GOES-16 imagery to download. "M1" -> mesoscale 1,
+        "M2" -> mesoscale 2, "C" -> CONUS
+
+    Returns
+    ------------
+    abi_fname : str
+        Filename downloaded as it is stored locally.
+        Format: YYYYMMDDHHMM.nc
+    """
+    abi_fnames = []
+    keys = []
+    dl_count = 0
+    tries = 0
+    success = False
+
+    if (get_os() == 'linux'):
+        path = '/home/mnichol3/Documents/senior-rsch/data/abi'
+    else:
+        path = 'D:\Documents\senior-research-data\abi'
+
+    # Make sure we have a list
+    if (len(date_time) != 12 ):
+        print('ERROR: Invalid date-time string (aws_dl.abi_dl)')
+        sys.exit(0)
+
+    s3 = boto3.client('s3')
+    s3.meta.events.register('choose-signer.s3.*', disable_signing)
+
+    # RadM1 for Meso sector 1
+    # RadM2 for Meso sector 2
+    if (sector == 'meso1'):
+        sector_prefix = 'M1'
+    elif (sector == 'meso2'):
+        sector_prefix = 'M2'
+    elif (sector == 'conus'):
+        sector_prefix = 'C'
+    else:
+        print('ERROR: Invalid sector parameter (aws_dl.abi_dl)')
+        sys.exit(0)
+
+
+    year = date[:4]
+    month = date[4:6]
+    day = date[6:8]
+    hour = date[8:10]
+    mins = date[-2:]
+    julian_day = calc_julian_day(date)
+
+    prefix = 'ABI-L1b-RadM/' + year + '/' + julian_day + '/' + hour + '/OR_ABI-L1b-Rad' + sector_prefix + '-M3C01_G16'
+    suffix = ''
+    kwargs = {'Bucket': 'noaa-goes16', 'Prefix': prefix}
+
+    while True:
+        resp = s3.list_objects_v2(**kwargs)
+        for obj in resp['Contents']:
+            key = obj['Key']
+            if key.endswith(suffix):
+                keys.append(key)
+
+        try:
+            kwargs['ContinuationToken'] = resp['NextContinuationToken']
+        except KeyError:
+            print('ERROR: Key error (aws_dl.abi_dl)')
+            sys.exit(0)
+
+    while (not success and tries < 120):
+        for x in keys:
+
+            # Matches scan end date-time
+            fname_match = re.search('e(' + year + julian_day + hour + mins + ')', x)
+
+            if (fname_match):
+                # eYYYYJJJHHMMSST
+                fname = fname_match[1] + '.nc'
+                local_fname = year + month + day + hour + fname[-7:-3] + '.nc'
+                try:
+                    print("Downloading ABI datafile: " + fname)
+                    s3.download_file('noaa-goes16', x, os.path.join(path, local_fname))
+                    success = True
+                except botocore.exceptions.ClientError as e:
+                    if e.response['Error']['Code'] == "404":
+                        print("The file does not exist in this AWS bucket.")
+                    else:
+                        print("Error downloading file from AWS")
+                    sys.exit(0)
+
+        if (not success):
+            print("Oops! No ABI file for that date and time found")
+            print("Adjusting and trying again")
+
+            tries += 1
+
+            adj_dt = dec_min(year + julian_day + hour + mins)
+
+            year = adj_dt[:4]
+            julian_day = adj_dt[4:7]
+            hour = adj_dt[7:9]
+            mins = adj_dt[-2:]
+
+
+    if (success):
+        print("Finished!")
+        return local_fname
+    else:
+        print("No ABI files near that date and time were found!")
+        return -1
+
 
 
 if __name__ == '__main__':
