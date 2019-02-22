@@ -8,6 +8,13 @@ import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 from cartopy.feature import NaturalEarthFeature
 import numpy as np
+from netCDF4 import Dataset
+import boto3
+from botocore.handlers import disable_signing
+import botocore
+from aws_dl import calc_julian_day
+import re
+import sys
 
 BASE_PATH = r'C:\Users\Salty Pete\Desktop\2018_Fall\Senior Research\HurricaneData'
 
@@ -219,3 +226,136 @@ def plot_intensity_lc():
     plt.grid(True)
     plt.legend()
     plt.show()
+
+
+
+def explore_netcdf(fname):
+    fh = Dataset(fname, mode='r')
+    print("Filename: " + fname.split('/')[-1])
+    print("Band ID: " + str(fh.variables['band_id'][0]))
+    print("Band Wavelength: " + str("%.2f" % fh.variables['band_wavelength'][0]))
+    print("Semi-major axis: " + str(fh.variables['goes_imager_projection'].semi_major_axis))
+    print("Semi-minor axis: " + str(fh.variables['goes_imager_projection'].semi_minor_axis))
+    print("Inverse flattening: " + str(fh.variables['goes_imager_projection'].inverse_flattening))
+    print("Latitude of projection origin: " + str(fh.variables['goes_imager_projection'].latitude_of_projection_origin))
+    print("Longitude of projection origin: " + str(fh.variables['goes_imager_projection'].longitude_of_projection_origin))
+
+
+
+
+def explore_aws_glm(date):
+    """
+    Parameters
+    ----------
+    date : str
+        Format : YYYYMMDD
+    """
+    s3 = boto3.client('s3')
+    s3.meta.events.register('choose-signer.s3.*', disable_signing)
+
+    year = date[:4]
+    hour = date[-2:]
+    julian_day = calc_julian_day(date)
+    month = date[4:6]
+    day = date[6:8]
+
+    keys = []
+    prefix = 'GLM-L2-LCFA/' + year + '/' + julian_day + '/' + hour + '/OR_GLM-L2-LCFA_G16'
+    suffix = ''
+    kwargs = {'Bucket': 'noaa-goes16', 'Prefix': prefix}
+
+    while True:
+        resp = s3.list_objects_v2(**kwargs)
+        for obj in resp['Contents']:
+            key = obj['Key']
+            if key.endswith(suffix):
+                keys.append(key)
+
+        try:
+            kwargs['ContinuationToken'] = resp['NextContinuationToken']
+        except KeyError:
+            break
+
+    #print(keys)
+    for x in keys:
+
+        fname_match = re.search('e(\d{14})', x) # Matches scan end date time
+
+        if (fname_match):
+            fname = fname_match[1] + '.nc'
+            local_fname = year + month + day + fname[-8:-3] + '.nc'
+            print(fname)
+            print(local_fname)
+
+
+
+def explore_aws_abi(date_time, sector):
+    s3 = boto3.client('s3')
+    s3.meta.events.register('choose-signer.s3.*', disable_signing)
+
+    keys = []
+    # RadM1 for Meso sector 1
+    # RadM2 for Meso sector 2
+
+    if (len(date_time) != 12 ):
+        print('ERROR: Invalid date-time string (aws_dl.abi_dl)')
+        sys.exit(0)
+
+    if (sector == 'meso1'):
+        sector_prefix = 'M1'
+    elif (sector == 'meso2'):
+        sector_prefix = 'M2'
+    elif (sector == 'conus'):
+        sector_prefix = 'C'
+    else:
+        print('Error: Invalid sector parameter!')
+        return
+
+    year = date_time[:4]
+    month = date_time[4:6]
+    day = date_time[6:8]
+    hour = date_time[8:10]
+    mins = date_time[-2:]
+    julian_day = calc_julian_day(date_time)
+
+    prefix = 'ABI-L1b-RadM/' + year + '/' + julian_day + '/' + hour + '/OR_ABI-L1b-Rad' + sector_prefix + '-M3C01_G16'
+    suffix = ''
+    kwargs = {'Bucket': 'noaa-goes16', 'Prefix': prefix}
+
+    while True:
+        resp = s3.list_objects_v2(**kwargs)
+        for obj in resp['Contents']:
+            key = obj['Key']
+            if key.endswith(suffix):
+                keys.append(key)
+
+        try:
+            kwargs['ContinuationToken'] = resp['NextContinuationToken']
+        except KeyError:
+            break
+
+    for x in keys:
+
+        #fname_match = re.search('e(\d{11})', x) # Matches scan end date time
+        fname_match = re.search('e(' + year + julian_day + hour + mins + ')', x)
+
+        if (fname_match):
+            print(fname_match[0])
+            fname = fname_match[1] + '.nc'
+            local_fname = year + month + day + fname[-7:-3] + '.nc'
+            print(fname)
+            print(local_fname)
+
+
+
+def main():
+    #file = '/home/mnichol3/Documents/senior-rsch/data/abi/20180912_1457z_Meso1_Ch1.nc'
+    #explore_netcdf(file)
+    #explore_aws_glm('20180912')
+    explore_aws_abi('201809121257', 'meso1')
+
+
+
+
+if __name__ == "__main__":
+    main()
