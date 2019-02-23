@@ -16,7 +16,7 @@ import os
 import sys
 import numpy as np
 #from .aws_dl import padding_zero
-from aws_dl import padding_zero
+from aws_dl import padding_zero, date_time_chunk
 
 
 BASE_URL = 'https://www.nhc.noaa.gov/archive/recon/'
@@ -32,6 +32,7 @@ def get_os():
     Parameters
     ------------
     none
+
 
     Returns
     ------------
@@ -70,6 +71,8 @@ def calc_min_list(date_time_start, date_time_end, mode='time_list'):
         mode = 'tot_mins' --> An int representing the total minutes from
                               date_time_start to date_time_end (inclusive)
                               will be returned
+
+
     Returns
     -------
     times : list of str
@@ -156,6 +159,7 @@ def hours_mins_2_mins(time):
     time : str
         Time, in hours & minutes, to be converted to minutes
 
+
     Returns
     ------------
     mins_tot : int
@@ -182,6 +186,7 @@ def dec_2_deg(coord):
     ------------
     coord : str
         Coordinate to be converted from decimal minutes to decimal degrees
+
 
     Returns
     ------------
@@ -221,6 +226,7 @@ def get_vdm(date, time, storm_name, octant = 'REPNT2'):
 
     octant : str
         Octant that the obs was taken within. Default is REPNT2
+
 
     Returns
     ------------
@@ -351,6 +357,7 @@ def vdm_df(date_time_start, date_time_end, storm_name, octant = 'REPNT2'):
 
     octant : str
         Octant the VDMs were taken in
+
 
     Returns
     ------------
@@ -531,6 +538,7 @@ def vdm_df(date_time_start, date_time_end, storm_name, octant = 'REPNT2'):
         #col_names = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']
         vdm_df = pd.DataFrame(data_list, columns=col_names, dtype=str)
         vdm_df = vdm_df.sort_values(by=['A'])
+        vdm_df = vdm_df.drop_duplicates(subset=['A', 'B', 'C'], keep='last')
 
         new_fname = "VDM-" + storm_name + "-" + date_time_start + "-" + date_time_end + ".txt"
 
@@ -559,6 +567,7 @@ def read_vdm_csv(fname):
     ------------
     fname : str
         Name of the csv file the Pandas dataframe was written to
+
 
     Returns
     ------------
@@ -596,12 +605,13 @@ def read_vdm_csv(fname):
 
     vdm_df = pd.read_csv(fname, sep=",", header=None, dtype=str)
     vdm_df.columns = col_names
+    vdm_df = vdm_df.drop_duplicates(subset=['A'], keep='last')
 
     return vdm_df
 
 
 
-def track_interp(vdm_df, year):
+def track_interp(vdm_df, year, interval):
     """
     This function takes a dataframe of accumulated VDM data and linearly
     interpolates the time and low pressure center coordinates on 1-minute
@@ -639,6 +649,10 @@ def track_interp(vdm_df, year):
     year : str
         Year the observation was taken
 
+    interval : str
+        String indicating whether to interpolate to 1-minute or 1-hour
+
+
     Returns
     -------
     interp_vdf : Pandas Dataframe
@@ -653,9 +667,6 @@ def track_interp(vdm_df, year):
     delta_ts = []
 
     obs_times = vdm_df['A'].tolist()
-
-    t_0 = obs_times[0]  # '09032126'
-    t_f = obs_times[-1] # '09102038'
 
     lats = [float(i) for i in vdm_df['B'].tolist()]
     lons = [float(j) for j in vdm_df['C'].tolist()]
@@ -686,39 +697,85 @@ def track_interp(vdm_df, year):
     '09101203', '09101341', '09101506', '09101714', '09102038']
     """
 
-    # Determine the time between t_0 and each of the other obs, in minutes
-    for x in obs_times:
-        delta_ts.append(calc_min_list(t_0, x, 'tot_mins'))
+    if (interval == "hour"):
 
-    time_span = np.arange(0, delta_ts[-1])
+        t_0 = obs_times[1]  # '09032245'
+        t_f = obs_times[-1] # '09102038'
 
-    lat_interp = np.interp(time_span, delta_ts, lats)
-    lon_interp = np.interp(time_span, delta_ts, lons)
+        for t in obs_times[1:]:
+            delta_ts.append(calc_min_list(t_0, t, 'tot_mins'))
 
-    #inter_coords = zip(time_span, lat_interp, lon_interp)
+        lats = lats[1:]
+        lons = lons[1:]
 
-    #return list(inter_coords)
+        date_times = date_time_chunk(year + t_0[:-2], year + t_f[:-2])
+        date_times = date_times[1:]
+        time_span = np.zeros(len(date_times))
 
-    #min_slp_interp = np.interp(time_span, delta_ts, min_slp)
+        # Create the times (in minutes from t_0) that we want interpolated
+        # coordinates for
+        for i, val in enumerate(date_times[1:]):
+            time_span[i] = calc_min_list(t_0, val[4:], 'tot_mins')
 
-    time_span_mins = calc_min_list(t_0, t_f, 'time_list')
+        lat_interp = np.interp(time_span, delta_ts, lats)
+        lon_interp = np.interp(time_span, delta_ts, lons)
 
-    """
-    print('time_span len: ' + str(len(time_span)))
-    print('time_span_mins len: ' + str(len(time_span_mins)))
-    print('lons len: ' + str(len(lon_interp)))
-    print('lats len: ' + str(len(lat_interp)))
-    """
+        #min_slp_interp = np.interp(time_span, delta_ts, min_slp)
+        print(np.all(np.diff(delta_ts) > 0))
+        #sys.exit(0)
+        """
+        ######### For debugging purposes #########
+        print('time_span len: ' + str(len(time_span)))
+        print('date_times len: ' + str(len(date_times)))
+        print('lons len: ' + str(len(lons)))
+        print('lats len: ' + str(len(lats)))
+        for x in zip(lon_interp, lat_interp):
+            print(x)
+        ##########################################
+        """
 
-    processed_vdm = pd.DataFrame({'date_time': time_span_mins,
+
+    elif (interval == "min"):
+
+        t_0 = obs_times[0]  # '09032126'
+        t_f = obs_times[-1] # '09102038'
+
+        # Determine the time between t_0 and each of the other obs, in minutes
+        for t in obs_times:
+            delta_ts.append(calc_min_list(t_0, t, 'tot_mins'))
+
+        time_span = np.arange(0, delta_ts[-1])
+
+        lat_interp = np.interp(time_span, delta_ts, lats)
+        lon_interp = np.interp(time_span, delta_ts, lons)
+
+        #min_slp_interp = np.interp(time_span, delta_ts, min_slp)
+
+        date_times = calc_min_list(t_0, t_f, 'time_list')
+
+        """
+        ######### For debugging purposes #########
+        print('time_span len: ' + str(len(time_span)))
+        print('date_times len: ' + str(len(date_times)))
+        print('lons len: ' + str(len(lons)))
+        print('lats len: ' + str(len(lats)))
+        ##########################################
+        """
+
+
+
+    else:
+        print('ERROR: Invalid interval parameter (vortex_data_parse.track_interp)')
+        sys.exit(0)
+
+
+    processed_vdm = pd.DataFrame({'date_time': date_times,
                                   'time_span': time_span,
                                   'lons': lon_interp,
                                   'lats': lat_interp
     })
 
     return processed_vdm
-
-
 
 
 
