@@ -69,51 +69,52 @@ def plot_coords_tpl(coords):
 
 
 
-    def plot_coords_df(df):
-        """
-        Plots geographic coordinates on a map.
+def plot_coords_df(df):
+    """
+    Plots geographic coordinates on a map.
 
-        Parameters
-        ----------
-        df : Pandas Dataframe
-            List consisting of tuples of (time, lat, lon)
-            Coordinates are in decimal degrees
+    Parameters
+    ----------
+    df : Pandas Dataframe
+        Coordinates are in decimal degrees
 
-        Returns
-        -------
-        None - displays a plot of the coordinates
-        """
+    Returns
+    -------
+    None - displays a plot of the coordinates
+    """
 
-        lats = [x[1] for x in coords]
-        lons = [x[2] for x in coords]
+    lons = df['lons'].tolist()
+    lats = df['lats'].tolist()
+
+    print((lons[-1], lats[-1]))
 
 
-        fig = plt.figure(figsize=(10, 5))
+    fig = plt.figure(figsize=(10, 5))
 
-        ax = fig.add_subplot(1, 1, 1, projection=ccrs.Mercator())
+    ax = fig.add_subplot(1, 1, 1, projection=ccrs.Mercator())
 
-        states = NaturalEarthFeature(category='cultural', scale='50m', facecolor='black',
-                                 name='admin_1_states_provinces_shp')
+    states = NaturalEarthFeature(category='cultural', scale='50m', facecolor='black',
+                             name='admin_1_states_provinces_shp')
 
-        land = NaturalEarthFeature('physical', 'land', '50m', facecolor='black')
+    land = NaturalEarthFeature('physical', 'land', '50m', facecolor='black')
 
-        ocean = NaturalEarthFeature('physical', 'ocean', '50m', facecolor='black')
+    ocean = NaturalEarthFeature('physical', 'ocean', '50m', facecolor='black')
 
-        ax.add_feature(land, linewidth=.8, edgecolor='gray', zorder = 1)
-        ax.add_feature(states, linewidth=.8, edgecolor='gray', zorder = 2)
-        ax.add_feature(ocean, linewidth=.8, edgecolor='gray', zorder = 0)
+    ax.add_feature(land, linewidth=.8, edgecolor='gray', zorder = 1)
+    ax.add_feature(states, linewidth=.8, edgecolor='gray', zorder = 2)
+    ax.add_feature(ocean, linewidth=.8, edgecolor='gray', zorder = 0)
 
-        ax.plot(lons, lats, transform=ccrs.PlateCarree(), marker = 'o', color = 'r', zorder=3)
+    ax.plot(lons, lats, transform=ccrs.PlateCarree(), marker = 'o', color = 'r', zorder=3)
 
-        """
-        for i, txt in enumerate(dt):
-            ax.annotate(txt, (lons[i], lats[i]), color = 'white', zorder = 4)
-        """
+    """
+    for i, txt in enumerate(dt):
+        ax.annotate(txt, (lons[i], lats[i]), color = 'white', zorder = 4)
+    """
 
-        plt.axis('equal')
-        plt.title('Hurricane Irma Interpolated VDM Low Pressure Center')
+    plt.axis('equal')
+    plt.title('Hurricane Irma Interpolated VDM Low Pressure Center')
 
-        plt.show()
+    plt.show()
 
 
 
