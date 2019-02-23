@@ -86,9 +86,6 @@ def plot_coords_df(df):
     lons = df['lons'].tolist()
     lats = df['lats'].tolist()
 
-    print((lons[-1], lats[-1]))
-
-
     fig = plt.figure(figsize=(10, 5))
 
     ax = fig.add_subplot(1, 1, 1, projection=ccrs.Mercator())

@@ -183,12 +183,15 @@ def main():
     f_abs = join(fpath, fname)
     vdp_df = vdp.read_vdm_csv(f_abs)
     #print(vdp_df['A'].tolist())
-    #coords = vdp.track_interp(vdp_df)
+    coords = vdp.track_interp(vdp_df, '2018', 'hour')
     #print(coords)
+    utils.plot_coords_df(coords)
 
-    aws_dl.abi_dl('201809121257', 'meso1')
+
+    #aws_dl.abi_dl('201809121257', 'meso1')
     #print(aws_dl.calc_julian_day('201809121257'))
     #print(vdp.calc_min_list('09032126', '09032245'))
+    #print(aws_dl.date_time_chunk('2018091218', '2018091305'))
 
 
 
