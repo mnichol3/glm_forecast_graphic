@@ -680,27 +680,10 @@ def track_interp(vdm_df, year, interval):
     else:
         fl_wind_o = vdm_df['G'].tolist()
 
-    """
-    ['09032126', '09032245', '09032358', '09040904', '09041027', '09041142',
-    '09041313', '09041652', '09041836', '09042140', '09042307', '09042323',
-    '09050020', '09050112', '09050149', '09050259', '09050437', '09050943',
-    '09051110', '09051119', '09051231', '09051302', '09051302', '09051449',
-    '09051638', '09052138', '09052245', '09052318', '09060003', '09060108',
-    '09060120', '09060153', '09060311', '09060503', '09061136', '09061439',
-    '09061626', '09061816', '09062017', '09070000', '09070113', '09070301',
-    '09070509', '09071112', '09071228', '09071411', '09071556', '09071715',
-    '09072333', '09080055', '09080235', '09080424', '09080501', '09080937',
-    '09081136', '09081250', '09081320', '09081437', '09081638', '09082113',
-    '09082234', '09082352', '09090136', '09090251', '09090511', '09090838',
-    '09091012', '09091154', '09091402', '09091830', '09092006', '09092143',
-    '09092306', '09100236', '09100412', '09100542', '09100725', '09100856',
-    '09101203', '09101341', '09101506', '09101714', '09102038']
-    """
-
     if (interval == "hour"):
 
-        t_0 = obs_times[1]  # '09032245'
-        t_f = obs_times[-1] # '09102038'
+        t_0 = obs_times[1]
+        t_f = obs_times[-1]
 
         for t in obs_times[1:]:
             delta_ts.append(calc_min_list(t_0, t, 'tot_mins'))
@@ -714,17 +697,17 @@ def track_interp(vdm_df, year, interval):
 
         # Create the times (in minutes from t_0) that we want interpolated
         # coordinates for
-        for i, val in enumerate(date_times[1:]):
+        for i, val in enumerate(date_times):
             time_span[i] = calc_min_list(t_0, val[4:], 'tot_mins')
 
         lat_interp = np.interp(time_span, delta_ts, lats)
         lon_interp = np.interp(time_span, delta_ts, lons)
 
         #min_slp_interp = np.interp(time_span, delta_ts, min_slp)
-        print(np.all(np.diff(delta_ts) > 0))
-        #sys.exit(0)
+
         """
         ######### For debugging purposes #########
+        print("Inc xp: " + np.all(np.diff(time_span) > 0))
         print('time_span len: ' + str(len(time_span)))
         print('date_times len: ' + str(len(date_times)))
         print('lons len: ' + str(len(lons)))
@@ -737,8 +720,8 @@ def track_interp(vdm_df, year, interval):
 
     elif (interval == "min"):
 
-        t_0 = obs_times[0]  # '09032126'
-        t_f = obs_times[-1] # '09102038'
+        t_0 = obs_times[0]
+        t_f = obs_times[-1]
 
         # Determine the time between t_0 and each of the other obs, in minutes
         for t in obs_times:
@@ -755,6 +738,7 @@ def track_interp(vdm_df, year, interval):
 
         """
         ######### For debugging purposes #########
+        print("Inc xp: " + np.all(np.diff(time_span) > 0))
         print('time_span len: ' + str(len(time_span)))
         print('date_times len: ' + str(len(date_times)))
         print('lons len: ' + str(len(lons)))
