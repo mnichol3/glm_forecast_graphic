@@ -20,6 +20,15 @@ BASE_PATH = r'C:\Users\Salty Pete\Desktop\2018_Fall\Senior Research\HurricaneDat
 
 
 
+def read_file():
+    """
+    Opens & reads a GOES-16 ABI data file, returning a dictionary of data
+
+    !!! NOTE: Returns implroper sat_lon value; return 75.0 but should be 75.2 for
+    GOES-16
+    """
+
+
 def plot_coords_tpl(coords):
     """
     Plots geographic coordinates on a map. Used to test observation coordinate

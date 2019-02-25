@@ -17,31 +17,12 @@ import sys
 import numpy as np
 #from .aws_dl import padding_zero
 from aws_dl import padding_zero, date_time_chunk
+from common import get_os
 
 
 BASE_URL = 'https://www.nhc.noaa.gov/archive/recon/'
 PATH_LINUX = '/home/mnichol3/Documents/senior-rsch/data/vdm'
 PATH_WIN = r'D:\Documents\senior-research-data\vdm'
-
-
-def get_os():
-    """
-    Determines the type of operating system being used. Needed for when we are
-    loading & saving local files later
-
-    Parameters
-    ------------
-    none
-
-
-    Returns
-    ------------
-    os_type : str
-        Type of OS the script is running on
-        Ex: 'linux' is the script is running on a Linux OS, such as Ubuntu
-    """
-    os_type = sys.platform
-    return os_type
 
 
 

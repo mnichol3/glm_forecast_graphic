@@ -18,31 +18,12 @@ import vortex_data_parse as vdp
 import sys
 from os import listdir
 from os.path import isfile, join
-import utils
+#import utils
 import glm_tc_graphic
+from common import get_os
 
 PATH_LINUX = '/home/mnichol3/Documents/senior-rsch/data/'
 PATH_WIN = r'D:\Documents\senior-research-data\hdob'
-
-def get_os():
-    """
-    Determines the type of operating system being used. Needed for when we are
-    loading & saving local files later
-
-    Parameters
-    ------------
-    none
-
-
-    Returns
-    ------------
-    os_type : str
-        Type of OS the script is running on
-        Ex: 'linux' is the script is running on a Linux OS, such as Ubuntu
-    """
-    os_type = sys.platform
-    return os_type
-
 
 
 def get_obs_path(obs_type):
@@ -189,10 +170,14 @@ def main():
     utils.plot_coords_df(coords)
     """
 
+    """
     data = glm_tc_graphic.accumulate_glm_data('2018091218', (-71.35, 29.93))
 
     for x in data:
         print(x)
+        """
+
+    print(get_os())
     #utils.explore_netcdf('/home/mnichol3/Documents/senior-rsch/data/glm/201809121801000.nc')
 
     #aws_dl.abi_dl('201809121257', 'meso1')
