@@ -8,7 +8,7 @@ This file contains scripts used to download GOES-16 Geostationary Lightning
 Mapper (GLM) & Advanced Baseline Imager (ABI) data files from NOAA's Amazon
 Web Service (AWS) bucket.
 
-Code that deals with AWS adapted from Alex Chan's code found here
+Code that deals with AWS buckt adapted from Alex Chan's code found here
 -> https://alexwlchan.net/2017/07/listing-s3-keys/
 
 --------------------------------------------------------------------------------
