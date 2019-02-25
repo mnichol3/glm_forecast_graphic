@@ -647,7 +647,7 @@ def track_interp(vdm_df, year, interval):
                 H : Aircfraft info
 
     year : str
-        Year the observation was taken
+        Year the observations were taken
 
     interval : str
         String indicating whether to interpolate to 1-minute or 1-hour

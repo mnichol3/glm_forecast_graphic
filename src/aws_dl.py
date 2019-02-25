@@ -287,7 +287,7 @@ def calc_julian_day(date):
 def glm_dl(date_lst):
     """
     Download ALL GOES-16 GLM data files from NOAA's Amazon AWS server for the
-    given date, time, & hour.
+    given date  & hour.
 
     13 Feb 19 : Now writes fnames to glm_fnames.csv
 
@@ -385,7 +385,8 @@ def glm_dl(date_lst):
 
 def abi_dl_multi(date_lst, sector):
     """
-    Downlad GOES-16 ABI data files from NOAA's Amazon AWS server
+    Download multiple GOES-16 ABI data files from NOAA's Amazon AWS server for
+    a given date, hour, and sector
 
     Parameters
     ------------
@@ -488,7 +489,8 @@ def abi_dl_multi(date_lst, sector):
 
 def abi_dl(date_time, sector):
     """
-    Downlad GOES-16 ABI data files from NOAA's Amazon AWS server
+    Downloads a single GOES-16 ABI data files from NOAA's Amazon AWS server for
+    a given datetime & sector
 
     Parameters
     ------------
