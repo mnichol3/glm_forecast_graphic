@@ -19,6 +19,7 @@ import sys
 from os import listdir
 from os.path import isfile, join
 import utils
+import glm_tc_graphic
 
 PATH_LINUX = '/home/mnichol3/Documents/senior-rsch/data/'
 PATH_WIN = r'D:\Documents\senior-research-data\hdob'
@@ -172,7 +173,7 @@ def main():
     #print(vdm_dict)
     #vdp.vdm_df('201708300000', '201709130600', 'irma')
 
-
+    """
     year = '2017'
     storm_name = 'IRMA'
     start_date = '20170830'
@@ -186,7 +187,13 @@ def main():
     coords = vdp.track_interp(vdp_df, '2018', 'hour')
     #print(coords)
     utils.plot_coords_df(coords)
+    """
 
+    data = glm_tc_graphic.accumulate_glm_data('2018091218', (-71.35, 29.93))
+
+    for x in data:
+        print(x)
+    #utils.explore_netcdf('/home/mnichol3/Documents/senior-rsch/data/glm/201809121801000.nc')
 
     #aws_dl.abi_dl('201809121257', 'meso1')
     #print(aws_dl.calc_julian_day('201809121257'))

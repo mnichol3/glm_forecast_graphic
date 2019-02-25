@@ -263,6 +263,17 @@ def plot_glm_data(data):
 def explore_netcdf(fname):
     fh = Dataset(fname, mode='r')
     print("Filename: " + fname.split('/')[-1])
+
+    """
+    # Display Variables
+    for key in fh.variables:
+        print(key)
+    """
+
+    print(fh.variables['flash_lon'][0])
+
+
+    """
     print("Band ID: " + str(fh.variables['band_id'][0]))
     print("Band Wavelength: " + str("%.2f" % fh.variables['band_wavelength'][0]))
     print("Semi-major axis: " + str(fh.variables['goes_imager_projection'].semi_major_axis))
@@ -270,6 +281,7 @@ def explore_netcdf(fname):
     print("Inverse flattening: " + str(fh.variables['goes_imager_projection'].inverse_flattening))
     print("Latitude of projection origin: " + str(fh.variables['goes_imager_projection'].latitude_of_projection_origin))
     print("Longitude of projection origin: " + str(fh.variables['goes_imager_projection'].longitude_of_projection_origin))
+    """
 
 
 

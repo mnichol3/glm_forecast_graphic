@@ -40,8 +40,10 @@ from shapely.ops import transform
 from shapely.geometry import Point
 from matplotlib.patches import Polygon
 from functools import partial
-from .GLM_plotter import accumulate_data
-#from GLM_plotter import accumulate_data
+import sys
+from os import listdir
+from os.path import isfile, join
+from math import sin, cos, sqrt, atan2, radians
 
 
 
@@ -53,6 +55,7 @@ def get_os():
     Parameters
     ------------
     none
+
 
     Returns
     ------------
@@ -76,6 +79,7 @@ def read_file():
     ------------
     fname : str
         Name of the GOES-16 ABI date file to be opened & processed
+
 
     Returns:
     ------------
@@ -174,6 +178,7 @@ def georeference(data_dict):
     data_dict : dictionary
         Dictionary of ABI file data & metadata
 
+
     Returns
     ------------
     (lons, lats) : tuple of lists of floats
@@ -210,6 +215,7 @@ def plot_geos(data_dict):
     ------------
     data_dict : dictionary
         Dictionary of data & metadata from GOES-16 ABI file
+
 
     Returns
     ------------
@@ -267,6 +273,7 @@ def plot_mercator(data_dict):
     ------------
     data_dict : dictionary
         Dictionary of data & metadata from GOES-16 ABI file
+
 
     Returns
     ------------
@@ -399,6 +406,7 @@ def geodesic_point_buffer(lat, lon, km):
     km : int
         Radius of the circle, in km
 
+
     Returns
     ------------
     A list of floats that prepresent the coordinates of the circle's edges
@@ -418,7 +426,47 @@ def geodesic_point_buffer(lat, lon, km):
 
 
 
-def accumulate_glm_data(date_time):
+def calc_dist(coords1, coords2):
+    """
+    Calculates the distance between a pair of geographic coordinates in decimal-
+    degree format
+
+    Parameters
+    ----------
+    coords1 : Tuple of floats
+        coords1[0] = lon 1
+        coords1[1] = lat 1
+
+    coords2 : Tuple of floats
+        coords2[0] = lon 2
+        coords2[1] = lat 2
+
+
+    Returns
+    -------
+    dist : float
+        Distance between the two coordinates, in km
+    """
+    R = 6373.0  # Radius of the Earth, in km
+
+    lon1 = radians(coords1[0])
+    lat1 = radians(coords1[1])
+    lon2 = radians(coords2[0])
+    lat2 = radians(coords2[1])
+
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
+
+    a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+    dist = R * c
+
+    return dist
+
+
+
+def accumulate_glm_data(date_time, center_coords):
     """
     Accumulates GOES-16 GLM data dowloaded from NOAA's Amazon AWS server and
     saved to a local file
@@ -428,13 +476,28 @@ def accumulate_glm_data(date_time):
     date_time : list of str
         Date & time of the desired files, in a 1-hr block. Format: YYYYMMDDHH
 
+    center_coords : Tuple of float
+        Tuple containing the low pressure center's longitude & latitude.
+        center_coords[0] = lon
+        center_coords[1] = lat
+
+
     Returns
     ------------
     glm_data : list of str
         List of GLM flash latitudes & longitudes
+
+    Notes
+    -----
+
+
     """
     flash_lats = np.array([])
     flash_lons = np.array([])
+
+    if (type(date_time) == str):
+        date_time = [date_time]
+
     julian_days = ['a'] * len(date_time)
     times_to_dl = []
 
@@ -457,14 +520,11 @@ def accumulate_glm_data(date_time):
 
     # Only call the download function if needed
     if (times_to_dl != []):
-        print('GLM_plotter.py is calling glm_dl!')
+        print('accumulate_glm_data is calling glm_dl...')
         glm_dl(times_to_dl)
-    else:
-        print('GLM_plotter.py is NOT calling glm_dl!')
 
-    for day in julian_days:
+    for day in date_time:     # previously : julian_days
         fnames = [f for f in listdir(path) if isfile(join(path, f)) and day in f]
-
         for f in fnames:
             file_path = join(path, f)
             fh = Dataset(file_path, mode='r')
@@ -474,9 +534,13 @@ def accumulate_glm_data(date_time):
 
             fh.close()
 
-    glm_data = [flash_lons, flash_lats]
+    glm_data = list(zip(flash_lons, flash_lats))
 
-    return glm_data
+    # Filter out flashes greater than 450 km away from the low pressure center
+    glm_data_filtered = [x for x in glm_data if calc_dist(x, center_coords) < 450.0]
+
+
+    return glm_data_filtered
 
 
 
