@@ -15,7 +15,7 @@ import re
 import os
 import sys
 import numpy as np
-#from .aws_dl import padding_zero
+#from . common import get_os, padding_zero, date_time_chunk
 from common import get_os, padding_zero, date_time_chunk
 
 
