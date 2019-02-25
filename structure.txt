@@ -5,9 +5,7 @@ glm_forecast_graphic/
 │   ├── archived_hdob_parse.py
 │   ├── aws_bucket.py
 │   ├── aws_dl.py
-│   ├── GLM_plotter.py
 │   ├── glm_tc_graphic.py
-│   ├── GOES16NetCDF.py
 │   ├── hurdat_plot.py
 │   ├── manager.py
 │   ├── parallax_error.py
