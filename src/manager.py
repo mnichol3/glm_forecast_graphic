@@ -21,7 +21,7 @@ import glm_tc_graphic
 from common import get_os
 
 PATH_LINUX = '/home/mnichol3/Documents/senior-rsch/data/'
-PATH_WIN = r'D:\Documents\senior-research-data\hdob'
+PATH_WIN = r'D:\Documents\senior-research-data\data'
 
 
 def get_obs_path(obs_type):
@@ -175,7 +175,6 @@ def main():
         print(x)
         """
 
-    print(get_os())
     #utils.explore_netcdf('/home/mnichol3/Documents/senior-rsch/data/glm/201809121801000.nc')
 
     #aws_dl.abi_dl('201809121257', 'meso1')
