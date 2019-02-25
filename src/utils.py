@@ -227,6 +227,39 @@ def plot_intensity_lc():
 
 
 
+def plot_glm_data(data):
+    """
+    Creates a simple plot of GLM flash date on a mercator-projection map, with
+    each flash represented by a yellow "+"
+
+    Parameters
+    ------------
+    data : list of lists of str
+        List containing 2 list; the first is a list of flash longitude coordinates,
+        the second is a list of flash latitude coordinates
+
+    Returns
+    ------------
+    A plot of GLM flash date on a mercator-projection map, with each flash
+    represented by a yellow "+"
+    """
+
+    flash_lons = data[0]
+    flash_lats = data[1]
+
+    ax = plt.axes(projection=ccrs.Mercator(central_longitude=-70))
+    states = NaturalEarthFeature(category='cultural', scale='50m', facecolor='none',
+                                 name='admin_1_states_provinces_shp')
+
+    ax.add_feature(states, linewidth=.8, edgecolor='gray')
+
+    plt.scatter(flash_lons, flash_lats, marker='+', color='yellow',
+                transform=ccrs.PlateCarree())
+
+    plt.show()
+
+
+
 def explore_netcdf(fname):
     fh = Dataset(fname, mode='r')
     print("Filename: " + fname.split('/')[-1])
