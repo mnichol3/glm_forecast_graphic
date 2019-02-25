@@ -37,10 +37,21 @@ Where:
     T    : Tenth second, no leading zero or decimal
 
 Ex:
+
 OR_ABI-L2-MCMIPC-M3_G16_s20181781922189_e20181781924562_c20181781925075.nc
+
 Scan start      : 2018 178 19:22:18:9
 Scan end        : 2018 178 19:24:56:2
 File created    : 2018 178 19:25:07:5
+
+--------------------------------------------------------------------------------
+
+NOAA AWS GLM Filename format:
+
+<sensor>-<level>-<product short name>/<year>/<julian day>/<hour>/OR_<sensor>
+-<level>-<product short name>-M<scanning mode>-C<channel>-G<GOES Satellite>
+-s<start time>_e<end time>_c<central time>.nc
+
 """
 
 
@@ -288,6 +299,12 @@ def glm_dl(date_lst):
     """
     Download ALL GOES-16 GLM data files from NOAA's Amazon AWS server for the
     given date  & hour.
+
+    NOAA AWS GLM Filename format:
+
+    <sensor>-<level>-<product short name>/<year>/<julian day>/<hour>/OR_<sensor>
+    -<level>-<product short name>-M<scanning mode>-C<channel>-G<GOES Satellite>
+    -s<start time>_e<end time>_c<central time>.nc
 
     13 Feb 19 : Now writes fnames to glm_fnames.csv
 
