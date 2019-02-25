@@ -10,10 +10,8 @@ produce the output
 """
 
 #from . import aws_dl
-#from . import GLM_plotter
 #from . import vortex_data_parse as vdp
 import aws_dl
-#import GLM_plotter
 import vortex_data_parse as vdp
 import sys
 from os import listdir
