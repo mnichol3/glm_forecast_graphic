@@ -279,10 +279,10 @@ def explore_netcdf(fname):
         print(key)
     """
 
-    print(fh.variables['flash_lon'][0])
+    #print(fh.variables['flash_lon'][0])
 
 
-    """
+
     print("Band ID: " + str(fh.variables['band_id'][0]))
     print("Band Wavelength: " + str("%.2f" % fh.variables['band_wavelength'][0]))
     print("Semi-major axis: " + str(fh.variables['goes_imager_projection'].semi_major_axis))
@@ -290,7 +290,7 @@ def explore_netcdf(fname):
     print("Inverse flattening: " + str(fh.variables['goes_imager_projection'].inverse_flattening))
     print("Latitude of projection origin: " + str(fh.variables['goes_imager_projection'].latitude_of_projection_origin))
     print("Longitude of projection origin: " + str(fh.variables['goes_imager_projection'].longitude_of_projection_origin))
-    """
+
 
 
 
@@ -407,7 +407,9 @@ def main():
     #file = '/home/mnichol3/Documents/senior-rsch/data/abi/20180912_1457z_Meso1_Ch1.nc'
     #explore_netcdf(file)
     #explore_aws_glm('20180912')
-    explore_aws_abi('201809121257', 'meso1')
+    #explore_aws_abi('201809121257', 'meso1')
+
+    explore_netcdf('/home/mnichol3/Downloads/ABI-L2-CMIPM_2018_255_17_OR_ABI-L2-CMIPM1-M3C01_G16_s20182551726204_e20182551726261_c20182551726323.nc')
 
 
 

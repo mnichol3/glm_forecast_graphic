@@ -175,6 +175,7 @@ def main():
         print(x)
         """
 
+    utils.explore_netcdf('ABI-L2-CMIPM_2018_255_17_OR_ABI-L2-CMIPM1-M3C01_G16_s20182551726204_e20182551726261_c20182551726323.nc')
     #utils.explore_netcdf('/home/mnichol3/Documents/senior-rsch/data/glm/201809121801000.nc')
 
     #aws_dl.abi_dl('201809121257', 'meso1')
