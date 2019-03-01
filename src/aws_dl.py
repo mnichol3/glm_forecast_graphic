@@ -14,13 +14,13 @@ Code that deals with AWS buckt adapted from Alex Chan's code found here
 --------------------------------------------------------------------------------
 NOAA AWS ABI file format:
 
-OR_ABI-L2-MCMIPC-M3_G16_sYYYYJJJHHMMSST_eYYYYJJJHHMMSST_cYYYYJJJHHMMSST.nc
+OR_ABI-L2-CMIPC-M3_G16_sYYYYJJJHHMMSST_eYYYYJJJHHMMSST_cYYYYJJJHHMMSST.nc
 
 Where:
     OR      : Indicates the system is operational
     ABI     : Instrument type (Advanced Baseline Imager, in this case)
     L2      : Indicated Level 2 data
-    MCMIP   : Multi-channel Cloud and Moisture Imagery Product
+    CMIP    : Cloud and Moisture Imagery Product
     C       : Indicates CONUS file
     M3      : Scan mode
     G16     : Indicates satellite (GOES-16 in this case)
@@ -277,9 +277,9 @@ def glm_dl(date_lst):
 
 
 
-def abi_dl_multi(date_lst, sector):
+def abi_dl_multi(date_lst, sector, band=1):
     """
-    Download multiple GOES-16 ABI data files from NOAA's Amazon AWS server for
+    Download multiple GOES-16 ABI L2 data files from NOAA's Amazon AWS server for
     a given date, hour, and sector
 
     Parameters
@@ -292,6 +292,11 @@ def abi_dl_multi(date_lst, sector):
         Sector of the GOES-16 imagery to download. "M1" -> mesoscale 1,
         "M2" -> mesoscale 2, "C" -> CONUS
 
+    band : int
+        Integer representing the band to download. Default is 01 (Red visible)
+        Range: 1-16
+
+
     Returns
     ------------
     abi_fnames : list of str
@@ -300,6 +305,7 @@ def abi_dl_multi(date_lst, sector):
     """
     abi_fnames = []
     dl_count = 0
+    band = padding_zero(band, 10)
 
     if (get_os() == 'linux'):
         path = PATH_LINUX_ABI
@@ -331,7 +337,8 @@ def abi_dl_multi(date_lst, sector):
         julian_day = calc_julian_day(date)
 
         keys = []
-        prefix = 'ABI-L1b-RadM/' + year + '/' + julian_day + '/' + hour + '/OR_ABI-L1b-Rad' + sector_prefix + '-M3C01_G16'
+        prefix = ('ABI-L2-CMIP' + sector_prefix[0] + '/' + year + '/' + julian_day + '/' + hour +
+                  '/OR_ABI-L2-CMIP' + sector_prefix + '-M3C' + band + '_G16')
         suffix = ''
         kwargs = {'Bucket': 'noaa-goes16', 'Prefix': prefix}
 
@@ -381,9 +388,9 @@ def abi_dl_multi(date_lst, sector):
 
 
 
-def abi_dl(date_time, sector):
+def abi_dl(date_time, sector, band=1):
     """
-    Downloads a single GOES-16 ABI data files from NOAA's Amazon AWS server for
+    Downloads a single GOES-16 ABI L2 data file from NOAA's Amazon AWS server for
     a given datetime & sector
 
     Parameters
@@ -396,6 +403,11 @@ def abi_dl(date_time, sector):
         Sector of the GOES-16 imagery to download. "M1" -> mesoscale 1,
         "M2" -> mesoscale 2, "C" -> CONUS
 
+    band : int
+        Integer representing the band to download. Default is 01 (Red visible)
+        Range: 1-16
+
+
     Returns
     ------------
     abi_fname : str
@@ -407,6 +419,7 @@ def abi_dl(date_time, sector):
     dl_count = 0
     tries = 0
     success = False
+    band = padding_zero(band, 10)
 
     if (get_os() == 'linux'):
         path = PATH_LINUX_ABI
@@ -441,7 +454,8 @@ def abi_dl(date_time, sector):
     mins = date_time[-2:]
     julian_day = calc_julian_day(date_time)
 
-    prefix = 'ABI-L1b-RadM/' + year + '/' + julian_day + '/' + hour + '/OR_ABI-L1b-Rad' + sector_prefix + '-M3C01_G16'
+    prefix = ('ABI-L2-CMIP' + sector_prefix[0] + '/' + year + '/' + julian_day + '/' + hour +
+              '/OR_ABI-L2-CMIP' + sector_prefix + '-M3C' + band + '_G16')
     suffix = ''
     kwargs = {'Bucket': 'noaa-goes16', 'Prefix': prefix}
 
