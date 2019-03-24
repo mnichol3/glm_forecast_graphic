@@ -509,6 +509,7 @@ def accumulate_glm_data(date_time, center_coords):
             file_path = join(path, f)
             fh = Dataset(file_path, mode='r')
 
+            # Use extend instead of append?
             flash_lats = np.append(flash_lats, fh.variables['flash_lat'][:])
             flash_lons = np.append(flash_lons, fh.variables['flash_lon'][:])
 
@@ -518,7 +519,6 @@ def accumulate_glm_data(date_time, center_coords):
 
     # Filter out flashes greater than 450 km away from the low pressure center
     glm_data_filtered = [x for x in glm_data if calc_dist(x, center_coords) < 450.0]
-
 
     return glm_data_filtered
 
