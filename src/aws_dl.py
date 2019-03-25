@@ -52,6 +52,10 @@ NOAA AWS GLM Filename format:
 -<level>-<product short name>-M<scanning mode>-C<channel>-G<GOES Satellite>
 -s<start time>_e<end time>_c<central time>.nc
 
+Ex:
+
+GLM-L2-LCFA/2019/059/17/OR_GLM-L2-LCFA_G16_s20190591700200_e20190591700400_c20190591700428.nc
+
 """
 
 
@@ -172,7 +176,7 @@ def calc_julian_day(date):
 
 
 
-def glm_dl(date_lst):
+def glm_dl(date_lst, storm_name, f_out=False):
     """
     Download ALL GOES-16 GLM data files from NOAA's Amazon AWS server for the
     given date  & hour.
@@ -196,14 +200,22 @@ def glm_dl(date_lst):
         List of date & time string of the desired files, in a 1-hr block.
         Format: YYYYMMDDHH
 
+    storm_name : str
+        Name of the storm being processed
+
+    f_out : bool
+        If true, writes the local filenames of downloaded GLM datafiles to a
+        csv file. Default is False
+
     Returns
     ------------
     glm_fnames : list of str
         List of downloaded GLM filenames as they are stored locally
-        Format: YYYMMDDHHMM.nc
+        Format: YYYYMMDDHHMMSSS.nc
     """
     glm_fnames = []
     dl_count = 0
+    dl_subcount = 0
 
     if (get_os() == 'linux'):
         path = PATH_LINUX_GLM
@@ -219,6 +231,7 @@ def glm_dl(date_lst):
 
     for date in date_lst:
 
+        dl_subcount = 0
         year = date[:4]
         hour = date[-2:]
         julian_day = calc_julian_day(date)
@@ -229,7 +242,7 @@ def glm_dl(date_lst):
         prefix = 'GLM-L2-LCFA/' + year + '/' + julian_day + '/' + hour + '/OR_GLM-L2-LCFA_G16'
         suffix = ''
         kwargs = {'Bucket': 'noaa-goes16', 'Prefix': prefix}
-
+        print(prefix)
         while True:
             resp = s3.list_objects_v2(**kwargs)
             for obj in resp['Contents']:
@@ -250,12 +263,14 @@ def glm_dl(date_lst):
                 # Filename with month & day as julian day
                 fname = fname_match[1] + '.nc'
                 # Filename with month & day as month & day
-                local_fname = year + month + day + fname[-8:-3] + '.nc'
+                local_fname = year + month + day + fname[-10:-3] + '.nc'
                 try:
                     sys.stdout.write("\rDownloading GLM datafile: {}".format(local_fname))
-                    s3.download_file('noaa-goes16', x, os.path.join(path, local_fname))
-                    glm_fnames.append(fname)
+                    s3.download_file('noaa-goes16', x, os.path.join(path,
+                                      year + '-' + storm_name, local_fname))
+                    glm_fnames.append(local_fname)
                     dl_count += 1
+                    dl_subcount += 1
                     sys.stdout.flush()
                 except botocore.exceptions.ClientError as e:
                     if e.response['Error']['Code'] == "404":
@@ -263,16 +278,21 @@ def glm_dl(date_lst):
                     else:
                         print("Error downloading file from AWS\n")
 
-    sys.stdout.write("\rFinished! Files downloaded: {}              ".format(dl_count))
+        sys.stdout.write("\rFiles downloaded for this prefix: {}              ".format(dl_subcount))
+        sys.stdout.flush()
+        print('\n')
+
+    sys.stdout.write("\rFinished! Total files downloaded: {}              ".format(dl_count))
     sys.stdout.flush()
-    print("\n")
-    '''
-    fname = 'glm_fnames-' + date_lst[0] + '-' + date_lst[-1] + '.csv'
-    with open(os.path.join(path, fname), 'w') as f:
-        writer = csv.writer(f, lineterminator='\n')
-        for x in glm_fnames:
-            writer.writerow([x])
-    '''
+    print('\n')
+
+    if (f_out):
+        fname = 'glm_fnames-' + storm_name + '-' + date_lst[0] + '-' + date_lst[-1] + '.csv'
+        with open(os.path.join(path, fname), 'w') as f:
+            writer = csv.writer(f, lineterminator='\n')
+            for x in glm_fnames:
+                writer.writerow([x])
+
     return glm_fnames
 
 

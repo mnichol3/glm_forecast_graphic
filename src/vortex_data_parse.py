@@ -189,7 +189,7 @@ def dec_2_deg(coord):
 
 
 
-def get_vdm(date, time, storm_name, octant = 'REPNT2'):
+def get_single_vdm(date, time, storm_name, octant = 'REPNT2'):
     """
     Downloads a VDM from within a specific storm for a given day & time.
 
@@ -197,9 +197,11 @@ def get_vdm(date, time, storm_name, octant = 'REPNT2'):
     ------------
     date : str
         Date the observation was taken
+        FORMAT: YYYYMMDD
 
     time : str
         Time the observation was taken
+        FORMAT: YYYYMMDD
 
     storm_name : str
         Name of the storm the observation was taken in
@@ -328,9 +330,11 @@ def vdm_df(date_time_start, date_time_end, storm_name, octant = 'REPNT2'):
     ------------
     date_time_start : str
         Starting date & time of VDMs
+        FORMAT: YYYYMMDDHHMM
 
     date_time_end : str
         Ending date & time of VDMs
+        FORMAT: YYYYMMDDHHMM
 
     storm_name : str
         Name of the storm the VDMs were taken in
@@ -444,7 +448,7 @@ def vdm_df(date_time_start, date_time_end, storm_name, octant = 'REPNT2'):
                 sys.exit(0)
 
             else:
-               print(x)     # Leave this in as a progress indicator
+               print("Downloading: " + x)     # Leave this in as a progress indicator
                month = x.split('.')[1][4:6]
                # USAF HDBO files have to extra lines at the end containing "$$"
                # and ";". We shall remove these
@@ -457,7 +461,7 @@ def vdm_df(date_time_start, date_time_end, storm_name, octant = 'REPNT2'):
                        # Date time format: dd/hh:mm:ss
                        date_time = data[4][3:].split('/')
                        date = month + date_time[0]
-                       time = date_time[2].split(':')
+                       time = date_time[1].split(':')
                        min_hr = time[0] + time[1]
                        curr_list.append(date + min_hr)     # Date time
 
@@ -648,8 +652,8 @@ def track_interp(vdm_df, year, interval):
 
     obs_times = vdm_df['A'].tolist()
 
-    lats = [float(i) for i in vdm_df['B'].tolist()]
-    lons = [float(j) for j in vdm_df['C'].tolist()]
+    lats = [float(i[:-1]) for i in vdm_df['B'].tolist()]
+    lons = [float(j[:-1]) for j in vdm_df['C'].tolist()]
 
     min_slp = [float(k) for k in vdm_df['D'].tolist()]
 

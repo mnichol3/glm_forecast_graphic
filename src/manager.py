@@ -14,13 +14,13 @@ produce the output
 import aws_dl
 import vortex_data_parse as vdp
 import sys
-from os import listdir
-from os.path import isfile, join
+from os import listdir, mkdir
+from os.path import isdir, isfile, join
 #import utils
 import glm_tc_graphic
 from common import get_os
 
-PATH_LINUX = '/home/mnichol3/Documents/senior-rsch/data/'
+PATH_LINUX = '/home/mnichol3/Documents/senior-rsch/data'
 PATH_WIN = r'D:\Documents\senior-research-data\data'
 
 
@@ -134,55 +134,75 @@ def get_obs_file(start_date, end_date, storm_name, obs_type, mode):
 
 
 
+def get_vdm(start_date, end_date, storm_name):
+
+    try:
+        f_info = get_obs_file(start_date, end_date, storm_name, 'vdm', 's')[0]
+    except TypeError:
+        print("VDM file does not exist locally")
+        print("Downloading VDM data files...")
+        vdp_df = vdp.vdm_df(start_date, end_date, storm_name)
+    else:
+        fname = f_info[0]
+        fpath = f_info[1]
+        f_abs = join(fpath, fname)
+        vdp_df = vdp.read_vdm_csv(f_abs)
+
+    return vdp_df
+
+
+
 def main():
 
-    #aws_dl.glm_dl(['2018091218', '2018091218'])
-    #glm_data = GLM_plotter.accumulate_data(['2018091218'])
-    #GLM_plotter.plot_data(glm_data)
+    year = '2018'
+    storm_name = 'FLORENCE'
+    start_date = '201809010900'
+    end_date = '201809140300'
 
+    storm_dict = {'FLORENCE': ['201809010900', '201809140300']}
 
-    # vortex_data_parse
-    date = '20180913'
-    time = '1600'
-    storm_name = 'florence'
+    subdirs = ['abi', 'glm', 'vdm']
+    default_octant = "REPNT2"
 
+    print('Processing storm: ' + year + '-' + storm_name + '\n')
 
-    #fname = 'VDM-IRMA-201708300000-201709130600.txt'
-    #vdm_dict = vdp.get_vdm(date, time, storm_name)
-    #print(vdm_dict)
-    #vdp.vdm_df('201708300000', '201709130600', 'irma')
+    print('Creating data directories...\n')
+    for f in subdirs:
+        if (f == 'vdm'):
+            path = join(PATH_LINUX, f, default_octant, year + '-' + storm_name)
+        else:
+            path = join(PATH_LINUX, f, year + '-' + storm_name)
+
+        if (not isdir(path)):
+            try:
+                mkdir(path)
+            except OSError:
+                print ("Creation of the directory %s failed" % path)
+            else:
+                print ("Created the directory %s" % path)
+
+    # Get accumulated vdm df
+    print('Downloading VDMs...\n')
+    vdm_df = get_vdm(start_date, end_date, storm_name)
+    coords = vdp.track_interp(vdm_df, year, 'hour')
+    #utils.plot_coords_df(coords)
 
     """
-    year = '2017'
-    storm_name = 'IRMA'
-    start_date = '20170830'
-    end_date = '20170913'
-    f_info = get_obs_file(start_date, end_date, storm_name, 'vdm', 's')[0]
-    fname = f_info[0]
-    fpath = f_info[1]
-    f_abs = join(fpath, fname)
-    vdp_df = vdp.read_vdm_csv(f_abs)
-    #print(vdp_df['A'].tolist())
-    coords = vdp.track_interp(vdp_df, '2018', 'hour')
-    #print(coords)
-    utils.plot_coords_df(coords)
+    We have a list of datetimes from coords corresponding to the LPC
+    1-hr interpolation.
+
+    Next, we need to accumulate the GLM data
     """
 
-    """
-    data = glm_tc_graphic.accumulate_glm_data('2018091218', (-71.35, 29.93))
+    datetimes = coords['date_time'].tolist()
+    datetimes = [n[:-2] for n in datetimes]
 
-    for x in data:
-        print(x)
-        """
+    for dt in datetimes:
+        print('Downloading GLM data for' + storm_name + '-' + dt + '...\n')
+        glm_fnames = aws_dl.glm_dl(datetimes, storm_name)
 
-    utils.explore_netcdf('ABI-L2-CMIPM_2018_255_17_OR_ABI-L2-CMIPM1-M3C01_G16_s20182551726204_e20182551726261_c20182551726323.nc')
-    #utils.explore_netcdf('/home/mnichol3/Documents/senior-rsch/data/glm/201809121801000.nc')
-
-    #aws_dl.abi_dl('201809121257', 'meso1')
-    #print(aws_dl.calc_julian_day('201809121257'))
-    #print(vdp.calc_min_list('09032126', '09032245'))
-    #print(aws_dl.date_time_chunk('2018091218', '2018091305'))
-
+        print('Filtering GLM data for' + storm_name + '-' + dt + '...\n')
+        sys.exit(0)
 
 
 if __name__ == "__main__":
