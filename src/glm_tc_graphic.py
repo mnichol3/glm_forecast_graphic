@@ -446,7 +446,7 @@ def calc_dist(coords1, coords2):
 
 
 
-def accumulate_glm_data(date_time, center_coords):
+def accumulate_glm_data(date_time, center_coords, storm_name):
     """
     Accumulates GOES-16 GLM data dowloaded from NOAA's Amazon AWS server and
     saved to a local file
@@ -461,6 +461,8 @@ def accumulate_glm_data(date_time, center_coords):
         center_coords[0] = lon
         center_coords[1] = lat
 
+    storm_name : str
+        Name of the storm being processed
 
     Returns
     ------------
@@ -485,14 +487,19 @@ def accumulate_glm_data(date_time, center_coords):
     if (type(date_time) == str):
         date_time = [date_time]
 
+    year = date_time[0][:4]
+
     if (get_os() == 'linux'):
         path = '/home/mnichol3/Documents/senior-rsch/data/glm'
     else:
         path = 'D:\Documents\senior-research-data\glm'
 
+    path = join(path, year + '-' + storm_name)
+    
     # Get list of already downloaded files
     curr_files = [f for f in listdir(path) if isfile(join(path, f))]
 
+    """
     for x in date_time:
         if (sum(x in fn for fn in curr_files) < 180):
             # Indicates the whole hour has not been downloaded
@@ -502,6 +509,7 @@ def accumulate_glm_data(date_time, center_coords):
     if (times_to_dl != []):
         print('accumulate_glm_data is calling glm_dl...')
         glm_dl(times_to_dl)
+    """
 
     for day in date_time:     # previously : julian_days
         fnames = [f for f in listdir(path) if isfile(join(path, f)) and day in f]

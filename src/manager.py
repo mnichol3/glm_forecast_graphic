@@ -197,12 +197,20 @@ def main():
     datetimes = coords['date_time'].tolist()
     datetimes = [n[:-2] for n in datetimes]
 
-    for dt in datetimes:
+    for idx, dt in enumerate(datetimes):
         print('Downloading GLM data for' + storm_name + '-' + dt + '...\n')
         glm_fnames = aws_dl.glm_dl(datetimes, storm_name)
 
         print('Filtering GLM data for' + storm_name + '-' + dt + '...\n')
-        sys.exit(0)
+
+        curr_row = coords.iloc[idx]
+
+        center_coords = (float(format(curr_row['lons'], '.3f')),
+                            float(format(curr_row['lats'], '.3f')))
+
+        glm_data = accumulate_glm_data(dt, center_coords, storm_name)
+
+        sys.exit(0) # For testing/debugging
 
 
 if __name__ == "__main__":
