@@ -46,9 +46,11 @@ from os.path import isfile, join
 from math import sin, cos, sqrt, atan2, radians
 from common import get_os
 
+PATH_LINUX_ABI = '/media/mnichol3/easystore/data/abi'
+PATH_LINUX_GLM = '/media/mnichol3/easystore/data/glm'
+PATH_LINUX_OUT = '/media/mnichol3/easystore/data/imgs'
 
-
-def read_file():
+def read_file(abi_file):
     """
     Opens & reads a GOES-16 ABI data file, returning a dictionary of data
 
@@ -70,23 +72,13 @@ def read_file():
     data_dict = {}
 
     # Ch. 1 - Blue vis. Good resolution, not able to use at night
-    #fname = 09142018_2101z_Meso1.nc
 
     # Ch. 11 - Cloud top infrared. Has much lower resolution than visible bands
-    #fname = 09142018_2101z_Meso1_ch11.nc
 
     # Ch. 13 - 'Clean' Longwave window. Not much different than Ch. 11
-    #fname = 09142018_2101z_Meso1_Ch13.nc
 
-    # TODO : add the test file to linux folder
-    if (get_os() == 'linux'):
-        file = '/home/mnichol3/Documents/senior-rsch/data/abi/20180912_1457z_Meso1_Ch1.nc'
-    else:
-        file = r"C:\Users\Salty Pete\Desktop\2018_Fall\Senior Research\20180912_1457z_Meso1_Ch1.nc"
 
-    #file = r"C:\Users\Salty Pete\Desktop\2018_Fall\Senior Research\20180912_1457z_Meso1_Ch1.nc"
-
-    fh = Dataset(file, mode='r')
+    fh = Dataset(join(PATH_LINUX_ABI, abi_file), mode='r')
 
     data_dict['band_id'] = fh.variables['band_id'][0]
 
@@ -99,7 +91,7 @@ def read_file():
     data_dict['inverse_flattening'] = fh.variables['goes_imager_projection'].inverse_flattening
     data_dict['latitude_of_projection_origin'] = fh.variables['goes_imager_projection'].latitude_of_projection_origin
     data_dict['longitude_of_projection_origin'] = fh.variables['goes_imager_projection'].longitude_of_projection_origin
-    data_dict['data_units'] = fh.variables['Rad'].units
+    data_dict['data_units'] = fh.variables['CMI'].units
 
     # Seconds since 2000-01-01 12:00:00
     add_seconds = fh.variables['t'][0]
@@ -128,12 +120,13 @@ def read_file():
     # Satellite sweep
     sat_sweep = fh.variables['goes_imager_projection'].sweep_angle_axis
 
-    data = fh.variables['Rad'][:].data
+    data = fh.variables['CMI'][:].data
 
     Xs = fh.variables['x'][:]
     Ys = fh.variables['y'][:]
 
     fh.close()
+    fh = None
 
     data_dict['scan_date'] = scan_date
     data_dict['sat_height'] = sat_height
@@ -243,7 +236,7 @@ def plot_geos(data_dict):
 
 
 
-def plot_mercator(data_dict):
+def plot_mercator(data_dict, glm_data, center_coords, storm_name):
     """
     Plot the GOES-16 data on a lambert-conformal projection map. Includes ABI
     imagery, GLM flash data, 100km, 200km, & 300km range rings, and red "+" at
@@ -283,17 +276,14 @@ def plot_mercator(data_dict):
     #ax.coastlines(resolution='10m', color='black', linewidth=0.8)
 
     # TODO: For presentation sample, disable title and add it back in on ppt
-    plt.title('GOES-16 Ch.' + str(data_dict['band_id']) + ' ' + str(data_dict['band_wavelength']) + 'um',
-              fontweight='semibold', fontsize=12, loc='left')
+    plt.title('GOES-16 Ch.' + str(data_dict['band_id']),
+              fontweight='semibold', fontsize=10, loc='left')
 
-    print('!!! WARNING: Storm name label currently hard-coded !!!')
-    plt.title('Florence - %s' % scan_date.strftime('%H:%M UTC %d %B %Y'), loc='right')
+    plt.title(storm_name + ' - %s' % scan_date.strftime('%H:%M UTC %d %B %Y'),
+              fontsize=10, loc='right')
 
-    # TODO: dynamically get low pressure center lat & lon
-    #cent_lon = -78.398732
-    #cent_lat = 34.232230
-    cent_lat = 29.93
-    cent_lon = -71.35
+    cent_lat = float(center_coords[1])
+    cent_lon = float(center_coords[0]) * -1
 
     lim_coords = geodesic_point_buffer(cent_lat, cent_lon, 400)
     lats = [float(x[1]) for x in lim_coords.coords[:]]
@@ -353,20 +343,27 @@ def plot_mercator(data_dict):
     plt.scatter(cent_lon,cent_lat, marker="+", color="r", transform=ccrs.PlateCarree(),
                 s = 200)
 
-    glm_data = accumulate_data('2018091214')
+    if (glm_data):
+        flash_lons = glm_data[0]
+        flash_lats = glm_data[1]
 
-    flash_lons = glm_data[0]
-    flash_lats = glm_data[1]
-
-    plt.scatter(flash_lons, flash_lats, marker='+', color='yellow',
-                transform=ccrs.PlateCarree())
+        plt.scatter(flash_lons, flash_lats, marker='+', color='yellow',
+                    transform=ccrs.PlateCarree(), zorder=10)
+    else:
+        print("No GLM flashes within 500 km of current center!\n")
 
     cbar = plt.colorbar(cmesh)
     # Increase font size of colorbar tick labels
     plt.setp(cbar.ax.yaxis.get_ticklabels(), fontsize=12)
     cbar.set_label('Radiance (' + data_dict['data_units'] + ')', fontsize = 14, labelpad = 20)
     plt.tight_layout()
-    plt.show()
+
+    fig = plt.gcf()
+    fig.set_size_inches((8.5, 11), forward=False)
+    fig.savefig(join(PATH_LINUX_OUT, scan_date.strftime('%Y') + '-' + storm_name,
+                scan_date.strftime('%Y%m%d-%H%M')) + '.png', dpi=500)
+
+    #plt.show()
 
 
 
@@ -480,8 +477,8 @@ def accumulate_glm_data(date_time, center_coords, storm_name):
     if (type(date_time) == str):
         date_time = [date_time]
 
-    julian_days = ['a'] * len(date_time)
-    times_to_dl = []
+    #julian_days = ['a'] * len(date_time)
+    #times_to_dl = []
 
     # Make date_time a list if its not one already
     if (type(date_time) == str):
@@ -490,12 +487,12 @@ def accumulate_glm_data(date_time, center_coords, storm_name):
     year = date_time[0][:4]
 
     if (get_os() == 'linux'):
-        path = '/home/mnichol3/Documents/senior-rsch/data/glm'
+        path = PATH_LINUX_GLM
     else:
         path = 'D:\Documents\senior-research-data\glm'
 
     path = join(path, year + '-' + storm_name)
-    
+
     # Get list of already downloaded files
     curr_files = [f for f in listdir(path) if isfile(join(path, f))]
 
@@ -513,22 +510,36 @@ def accumulate_glm_data(date_time, center_coords, storm_name):
 
     for day in date_time:     # previously : julian_days
         fnames = [f for f in listdir(path) if isfile(join(path, f)) and day in f]
+        skipped = 0
+
         for f in fnames:
+
             file_path = join(path, f)
-            fh = Dataset(file_path, mode='r')
 
-            # Use extend instead of append?
-            flash_lats = np.append(flash_lats, fh.variables['flash_lat'][:])
-            flash_lons = np.append(flash_lons, fh.variables['flash_lon'][:])
+            try:
+                fh = Dataset(file_path, mode='r')
+            except OSError:
+                print('!!! WARNING!!! HDF error #' + str(skipped) + ' ' + f)
+                if (skipped == 5):
+                    print('ERROR: accumulate_glm_data HDF errors exceeded allowable threshold')
+                    sys.exit(0)
+                else:
+                    skipped += 1
+            else:
+                flash_lats = np.append(flash_lats, fh.variables['flash_lat'][:])
+                flash_lons = np.append(flash_lons, fh.variables['flash_lon'][:])
 
-            fh.close()
+                fh.close()
+                fh = None
 
-    glm_data = list(zip(flash_lons, flash_lats))
+    #glm_data = list(zip(flash_lons, flash_lats))
+    glm_data = (flash_lons, flash_lats)
 
     # Filter out flashes greater than 450 km away from the low pressure center
-    glm_data_filtered = [x for x in glm_data if calc_dist(x, center_coords) < 450.0]
+    #glm_data_filtered = [x for x in glm_data if calc_dist(x, center_coords) < 500.0]
 
-    return glm_data_filtered
+    #return glm_data_filtered
+    return glm_data
 
 
 

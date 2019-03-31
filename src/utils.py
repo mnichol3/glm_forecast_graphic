@@ -403,13 +403,28 @@ def explore_aws_abi(date_time, sector):
 
 
 
+def plot_abi(fname):
+    fh = Dataset(fname, mode='r')
+
+    radiance = fh.variables['CMI'][:]
+    fh.close()
+    fh = None
+
+    fig = plt.figure(figsize=(6,6),dpi=200)
+    im = plt.imshow(radiance, cmap='Greys')
+    cb = fig.colorbar(im, orientation='horizontal')
+    cb.set_ticks([1, 100, 200, 300, 400, 500, 600])
+    cb.set_label('Radiance (W m-2 sr-1 um-1)')
+    plt.show()
+
+
 def main():
     #file = '/home/mnichol3/Documents/senior-rsch/data/abi/20180912_1457z_Meso1_Ch1.nc'
     #explore_netcdf(file)
     #explore_aws_glm('20180912')
     #explore_aws_abi('201809121257', 'meso1')
 
-    explore_netcdf('/home/mnichol3/Downloads/ABI-L2-CMIPM_2018_255_17_OR_ABI-L2-CMIPM1-M3C01_G16_s20182551726204_e20182551726261_c20182551726323.nc')
+    plot_abi('/media/mnichol3/easystore/data/abi/20180908171700.nc')
 
 
 

@@ -69,9 +69,8 @@ import csv
 from common import get_os, padding_zero, date_time_chunk
 
 
-
-PATH_LINUX_ABI = '/home/mnichol3/Documents/senior-rsch/data/abi'
-PATH_LINUX_GLM = '/home/mnichol3/Documents/senior-rsch/data/glm'
+PATH_LINUX_ABI = '/media/mnichol3/easystore/data/abi'
+PATH_LINUX_GLM = '/media/mnichol3/easystore/data/glm'
 PATH_WIN_ABI = r'D:\Documents\senior-research-data\abi'
 PATH_WIN_GLM = r'D:\Documents\senior-research-data\glm'
 

@@ -11,16 +11,18 @@ produce the output
 
 #from . import aws_dl
 #from . import vortex_data_parse as vdp
-import aws_dl
+from aws_dl import abi_dl, glm_dl
 import vortex_data_parse as vdp
 import sys
 from os import listdir, mkdir
 from os.path import isdir, isfile, join
 #import utils
-import glm_tc_graphic
+from glm_tc_graphic import accumulate_glm_data, plot_mercator, read_file
 from common import get_os
+import utils
 
-PATH_LINUX = '/home/mnichol3/Documents/senior-rsch/data'
+PATH_LINUX = '/media/mnichol3/easystore/data'
+PATH_LINUX_OUT = '/media/mnichol3/easystore/data/imgs'
 PATH_WIN = r'D:\Documents\senior-research-data\data'
 
 
@@ -120,7 +122,13 @@ def get_obs_file(start_date, end_date, storm_name, obs_type, mode):
     obs_path = get_obs_path(obs_type)
     subdir = year + '-' + storm_name.upper()
     abs_path = join(obs_path, subdir)
-    files = [(f, abs_path) for f in listdir(abs_path) if isfile(join(abs_path, f))]
+
+    try:
+        files = [(f, abs_path) for f in listdir(abs_path) if isfile(join(abs_path, f))]
+    except FileNotFoundError:
+        print('Directory not found: ' + subdir)
+        print('in manager.get_obs_file')
+        sys.exit(0)
 
     if (mode == 'a'):
         return files
@@ -152,34 +160,52 @@ def get_vdm(start_date, end_date, storm_name):
 
 
 
+def make_dir(dirs):
+
+    for p in dirs:
+        if (not isdir(p)):
+            try:
+                mkdir(p)
+            except OSError:
+                print ("Creation of the directory %s failed" % p)
+                sys.exit(0)
+            else:
+                print ("Created the directory %s" % p)
+
+
+
 def main():
+    """
+    Notes
+    -----
+
+    FLORENCE:
+        Meso2 from 201809010900 - 201809101400
+        Meso1 from 201809101400 - ?
+    """
+    # Takes ~35 seconds to produce 1 graphic
 
     year = '2018'
     storm_name = 'FLORENCE'
-    start_date = '201809010900'
+    start_date = '201809101400' #'201809082200'
     end_date = '201809140300'
 
-    storm_dict = {'FLORENCE': ['201809010900', '201809140300']}
+    storm_dict = {'FLORENCE': ['201809010900', '201809140300', 'meso2']}
 
-    subdirs = ['abi', 'glm', 'vdm']
+    subdirs = ['abi', 'glm', 'vdm', 'imgs']
     default_octant = "REPNT2"
 
-    print('Processing storm: ' + year + '-' + storm_name + '\n')
+    print('\nProcessing storm: ' + year + '-' + storm_name + '\n')
 
     print('Creating data directories...\n')
     for f in subdirs:
         if (f == 'vdm'):
-            path = join(PATH_LINUX, f, default_octant, year + '-' + storm_name)
+            path1 = join(PATH_LINUX, f, default_octant)
+            path2 = join(PATH_LINUX, f, default_octant, year + '-' + storm_name)
+            make_dir([path1, path2])
         else:
             path = join(PATH_LINUX, f, year + '-' + storm_name)
-
-        if (not isdir(path)):
-            try:
-                mkdir(path)
-            except OSError:
-                print ("Creation of the directory %s failed" % path)
-            else:
-                print ("Created the directory %s" % path)
+            make_dir([path])
 
     # Get accumulated vdm df
     print('Downloading VDMs...\n')
@@ -198,10 +224,24 @@ def main():
     datetimes = [n[:-2] for n in datetimes]
 
     for idx, dt in enumerate(datetimes):
-        print('Downloading GLM data for' + storm_name + '-' + dt + '...\n')
-        glm_fnames = aws_dl.glm_dl(datetimes, storm_name)
 
-        print('Filtering GLM data for' + storm_name + '-' + dt + '...\n')
+        print('Downloading GLM data for ' + storm_name + '-' + dt + '...\n')
+        glm_fnames = glm_dl(dt, storm_name)
+
+        print('Downloading ABI data for ' + storm_name + '-' + dt + '...\n')
+
+        if (int(dt) <= 2018091014):
+            sector = 'meso2'
+        else:
+            sector = 'meso1'
+
+        print('ABI sector: ' + sector + '\n')
+
+        abi_fname = abi_dl(dt + '00', sector, band=13)
+
+        print('abi fname: ' + abi_fname + '...\n')
+
+        print('Filtering GLM data for ' + storm_name + '-' + dt + '...\n')
 
         curr_row = coords.iloc[idx]
 
@@ -210,7 +250,14 @@ def main():
 
         glm_data = accumulate_glm_data(dt, center_coords, storm_name)
 
-        sys.exit(0) # For testing/debugging
+        print('Parsing ABI data...\n')
+        data_dict = read_file(abi_fname)
+
+        print('Creating graphic for ' + storm_name + '-' + dt + '...\n')
+        plot_mercator(data_dict, glm_data, center_coords, storm_name)
+
+        print('-----------------------------------------------------------------')
+        #sys.exit(0) # For testing/debugging
 
 
 if __name__ == "__main__":

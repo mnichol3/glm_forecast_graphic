@@ -17,10 +17,11 @@ import sys
 import numpy as np
 #from . common import get_os, padding_zero, date_time_chunk
 from common import get_os, padding_zero, date_time_chunk
+import config
 
 
 BASE_URL = 'https://www.nhc.noaa.gov/archive/recon/'
-PATH_LINUX = '/home/mnichol3/Documents/senior-rsch/data/vdm'
+PATH_LINUX_VDM = '/media/mnichol3/easystore/data/vdm'
 PATH_WIN = r'D:\Documents\senior-research-data\vdm'
 
 
@@ -527,7 +528,7 @@ def vdm_df(date_time_start, date_time_end, storm_name, octant = 'REPNT2'):
         new_fname = "VDM-" + storm_name + "-" + date_time_start + "-" + date_time_end + ".txt"
 
         if (get_os() == 'linux'):
-            path = PATH_LINUX
+            path = PATH_LINUX_VDM
         else:
             path = PATH_WIN
 
@@ -649,6 +650,7 @@ def track_interp(vdm_df, year, interval):
 
     """
     delta_ts = []
+    rmw_vals = []
 
     obs_times = vdm_df['A'].tolist()
 
@@ -657,12 +659,26 @@ def track_interp(vdm_df, year, interval):
 
     min_slp = [float(k) for k in vdm_df['D'].tolist()]
 
-    fl_wind_i = vdm_df['F'].tolist()
+    rmw_in = vdm_df['F'].tolist()
+    rmw_in = [x.split(' ')[2] for x in rmw_in]
 
     if (year == '2018'):
-        fl_wind_o = vdm_df['H'].tolist()
+        rmw_out = vdm_df['H'].tolist()
     else:
-        fl_wind_o = vdm_df['G'].tolist()
+        rmw_out = vdm_df['G'].tolist()
+
+    rmw_out = [x.split(' ')[2] for x in rmw_out]
+
+    if (len(rmw_in) != len(rmw_out)):
+        print("Error parsing inbound & outbound RMW in vdp.track_interp")
+        sys.exit(0)
+    else:
+        lim = len(rmw_in)
+        idx = 0
+        while (idx < lim):
+            avg_rmw = (int(rmw_in[idx]) + int(rmw_out[idx])) / 2
+            rmw_vals.append(avg_rmw)
+            idx += 1
 
     if (interval == "hour"):
 
@@ -686,8 +702,9 @@ def track_interp(vdm_df, year, interval):
 
         lat_interp = np.interp(time_span, delta_ts, lats)
         lon_interp = np.interp(time_span, delta_ts, lons)
+        rmw_interp = np.interp(time_span, delta_ts, rmw_vals[1:])
 
-        #min_slp_interp = np.interp(time_span, delta_ts, min_slp)
+        #min_slp_interp = np.interp(time_span, delta_ts, min_slp[1:])
 
         """
         ######### For debugging purposes #########
@@ -715,6 +732,7 @@ def track_interp(vdm_df, year, interval):
 
         lat_interp = np.interp(time_span, delta_ts, lats)
         lon_interp = np.interp(time_span, delta_ts, lons)
+        rmw_interp = np.interp(time_span, delta_ts, rmw_vals)
 
         #min_slp_interp = np.interp(time_span, delta_ts, min_slp)
 
@@ -740,7 +758,8 @@ def track_interp(vdm_df, year, interval):
     processed_vdm = pd.DataFrame({'date_time': date_times,
                                   'time_span': time_span,
                                   'lons': lon_interp,
-                                  'lats': lat_interp
+                                  'lats': lat_interp,
+                                  'rmw' : rmw_interp
     })
 
     return processed_vdm
