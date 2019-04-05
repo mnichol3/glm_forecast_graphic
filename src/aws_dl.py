@@ -63,7 +63,7 @@ import boto3
 from botocore.handlers import disable_signing
 import botocore
 import re
-import os
+from os.path import join, isfile
 import sys
 import csv
 from common import get_os, padding_zero, date_time_chunk
@@ -213,6 +213,7 @@ def glm_dl(date_lst, storm_name, f_out=False):
         Format: YYYYMMDDHHMMSSS.nc
     """
     glm_fnames = []
+    hour_fnames = []
     dl_count = 0
     dl_subcount = 0
 
@@ -230,6 +231,7 @@ def glm_dl(date_lst, storm_name, f_out=False):
 
     for date in date_lst:
 
+        hour_fnames = []
         dl_subcount = 0
         year = date[:4]
         hour = date[-2:]
@@ -237,60 +239,83 @@ def glm_dl(date_lst, storm_name, f_out=False):
         month = date[4:6]
         day = date[6:8]
 
-        keys = []
-        prefix = 'GLM-L2-LCFA/' + year + '/' + julian_day + '/' + hour + '/OR_GLM-L2-LCFA_G16'
-        suffix = ''
-        kwargs = {'Bucket': 'noaa-goes16', 'Prefix': prefix}
-        print(prefix)
-        while True:
-            resp = s3.list_objects_v2(**kwargs)
-            for obj in resp['Contents']:
-                key = obj['Key']
-                if key.endswith(suffix):
-                    keys.append(key)
+        fname = 'fnames-' + date + '.csv'
 
-            try:
-                kwargs['ContinuationToken'] = resp['NextContinuationToken']
-            except KeyError:
-                break # LEAVE AS A BREAK !!!!!!!
+        if (isfile(join(path,fname))):
 
-        for x in keys:
+            print("Reading local GLM file names...\n")
 
-            fname_match = re.search('e(\d{14})', x) # Matches scan end date time
+            with open(join(path,fname), 'r') as f:
+                reader = csv.reader(f)
+                glm_fnames = list(reader)
+                glm_fnames = [x[0] for x in glm_fnames]
+        else:
 
-            if (fname_match):
-                # Filename with month & day as julian day
-                fname = fname_match[1] + '.nc'
-                # Filename with month & day as month & day
-                local_fname = year + month + day + fname[-10:-3] + '.nc'
+            keys = []
+            prefix = 'GLM-L2-LCFA/' + year + '/' + julian_day + '/' + hour + '/OR_GLM-L2-LCFA_G16'
+            suffix = ''
+            kwargs = {'Bucket': 'noaa-goes16', 'Prefix': prefix}
+            print(prefix)
+            while True:
+                resp = s3.list_objects_v2(**kwargs)
+                for obj in resp['Contents']:
+                    key = obj['Key']
+                    if key.endswith(suffix):
+                        keys.append(key)
+
                 try:
-                    sys.stdout.write("\rDownloading GLM datafile: {}".format(local_fname))
-                    s3.download_file('noaa-goes16', x, os.path.join(path,
-                                      year + '-' + storm_name, local_fname))
-                    glm_fnames.append(local_fname)
-                    dl_count += 1
-                    dl_subcount += 1
-                    sys.stdout.flush()
-                except botocore.exceptions.ClientError as e:
-                    if e.response['Error']['Code'] == "404":
-                        print("The file does not exist in this AWS bucket.")
-                    else:
-                        print("Error downloading file from AWS\n")
+                    kwargs['ContinuationToken'] = resp['NextContinuationToken']
+                except KeyError:
+                    break # LEAVE AS A BREAK !!!!!!!
 
-        sys.stdout.write("\rFiles downloaded for this prefix: {}              ".format(dl_subcount))
+            for x in keys:
+
+                fname_match = re.search('e(\d{14})', x) # Matches scan end date time
+
+                if (fname_match):
+                    # Filename with month & day as julian day
+                    fname = fname_match[1] + '.nc'
+                    # Filename with month & day as month & day
+                    local_fname = year + month + day + fname[-10:-3] + '.nc'
+                    try:
+                        sys.stdout.write("\rDownloading GLM datafile: {}".format(local_fname))
+                        s3.download_file('noaa-goes16', x, join(path,
+                                          year + '-' + storm_name, local_fname))
+                        glm_fnames.append(local_fname)
+                        hour_fnames.append(local_fname)
+                        dl_count += 1
+                        dl_subcount += 1
+                        sys.stdout.flush()
+                    except botocore.exceptions.ClientError as e:
+                        if e.response['Error']['Code'] == "404":
+                            print("The file does not exist in this AWS bucket.")
+                        else:
+                            print("Error downloading file from AWS\n")
+
+            if (f_out):
+                fname = 'fnames-' + date + '.csv'
+                with open(join(path, fname), 'w') as f:
+                    writer = csv.writer(f, lineterminator='\n')
+                    for x in hour_fnames:
+                        writer.writerow([x])
+
+
+            sys.stdout.write("\rFiles downloaded for this prefix: {}              ".format(dl_subcount))
+            sys.stdout.flush()
+            print('\n')
+
+        sys.stdout.write("\rFinished! Total files downloaded: {}              ".format(dl_count))
         sys.stdout.flush()
         print('\n')
 
-    sys.stdout.write("\rFinished! Total files downloaded: {}              ".format(dl_count))
-    sys.stdout.flush()
-    print('\n')
-
+    """
     if (f_out):
-        fname = 'glm_fnames-' + storm_name + '-' + date_lst[0] + '-' + date_lst[-1] + '.csv'
-        with open(os.path.join(path, fname), 'w') as f:
+        fname = 'fnames-' + storm_name + '-' + date_lst[0] + '-' + date_lst[-1] + '.csv'
+        with open(join(path, fname), 'w') as f:
             writer = csv.writer(f, lineterminator='\n')
             for x in glm_fnames:
                 writer.writerow([x])
+    """
 
     return glm_fnames
 
@@ -382,7 +407,7 @@ def abi_dl_multi(date_lst, sector, band=1):
                 local_fname = year + month + day + hour + fname[-7:-3] + '.nc'
                 try:
                     sys.stdout.write("\rDownloading ABI datafile: {}".format(fname))
-                    s3.download_file('noaa-goes16', x, os.path.join(path, local_fname))
+                    s3.download_file('noaa-goes16', x, join(path, local_fname))
                     abi_fnames.append(fname)
                     dl_count += 1
                     sys.stdout.flush()
@@ -398,7 +423,7 @@ def abi_dl_multi(date_lst, sector, band=1):
     print("\n")
     '''
     fname = 'abi_fnames-' + date_lst[0] + '-' + date_lst[-1] + '.csv'
-    with open(os.path.join(path, fname), 'w') as f:
+    with open(join(path, fname), 'w') as f:
         writer = csv.writer(f, lineterminator='\n')
         for x in abi_fnames:
             writer.writerow([x])
@@ -502,7 +527,7 @@ def abi_dl(date_time, sector, band=1):
                 local_fname = year + month + day + hour + fname[-7:-3] + '.nc'
                 try:
                     print("Downloading ABI datafile: " + fname)
-                    s3.download_file('noaa-goes16', x, os.path.join(path, local_fname))
+                    s3.download_file('noaa-goes16', x, join(path, local_fname))
                     success = True
                 except botocore.exceptions.ClientError as e:
                     if e.response['Error']['Code'] == "404":
