@@ -676,8 +676,9 @@ def track_interp(vdm_df, year, interval):
         lim = len(rmw_in)
         idx = 0
         while (idx < lim):
-            avg_rmw = (int(rmw_in[idx]) + int(rmw_out[idx])) / 2
-            rmw_vals.append(avg_rmw)
+            #avg_rmw = (int(rmw_in[idx]) + int(rmw_out[idx])) / 2
+            #rmw_vals.append(avg_rmw)
+            rmw_vals.append(max(int(rmw_in[idx]), int(rmw_out[idx])))
             idx += 1
 
     if (interval == "hour"):

@@ -33,6 +33,7 @@ import matplotlib.pyplot as plt
 import pyproj
 import cartopy.crs as ccrs
 import matplotlib.ticker as mticker
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 import matplotlib.cm as cm
 from cartopy.feature import NaturalEarthFeature
@@ -236,7 +237,7 @@ def plot_geos(data_dict):
 
 
 
-def plot_mercator(data_dict, glm_data, center_coords, storm_name):
+def plot_mercator(data_dict, glm_data, center_coords, rmw, storm_name):
     """
     Plot the GOES-16 data on a lambert-conformal projection map. Includes ABI
     imagery, GLM flash data, 100km, 200km, & 300km range rings, and red "+" at
@@ -325,6 +326,17 @@ def plot_mercator(data_dict, glm_data, center_coords, storm_name):
         plt.text(cent_lon, max_lat + 0.05, str(x) + " km", color = "r", horizontalalignment="center", transform=ccrs.PlateCarree(),
                  fontsize = 15)
 
+    # Draw the RMW
+    rmw_ring = geodesic_point_buffer(cent_lat, cent_lon, rmw)
+    lats = [float(x[1]) for x in rmw_ring.coords[:]]
+    max_lat = max(lats)
+
+    mpl_poly = Polygon(np.array(rmw_ring), ec="fuchsia", fc="none", transform=ccrs.PlateCarree(),
+                       linewidth=1.25)
+    ax.add_patch(mpl_poly)
+    plt.text(cent_lon, max_lat + 0.05, "RMW", color = "fuchsia", horizontalalignment="center", transform=ccrs.PlateCarree(),
+             fontsize = 15)
+
     # Set lat & lon grid tick marks
     lon_ticks = [x for x in range(-180, 181) if x % 2 == 0]
     lat_ticks = [x for x in range(-90, 91) if x % 2 == 0]
@@ -352,7 +364,8 @@ def plot_mercator(data_dict, glm_data, center_coords, storm_name):
     else:
         print("No GLM flashes within 500 km of current center!\n")
 
-    cbar = plt.colorbar(cmesh)
+    cbar = plt.colorbar(cmesh,fraction=0.046, pad=0.04)
+
     # Increase font size of colorbar tick labels
     plt.setp(cbar.ax.yaxis.get_ticklabels(), fontsize=12)
     cbar.set_label('Radiance (' + data_dict['data_units'] + ')', fontsize = 14, labelpad = 20)

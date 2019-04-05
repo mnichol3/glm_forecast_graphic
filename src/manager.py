@@ -226,7 +226,7 @@ def main():
     for idx, dt in enumerate(datetimes):
 
         print('Downloading GLM data for ' + storm_name + '-' + dt + '...\n')
-        glm_fnames = glm_dl(dt, storm_name)
+        glm_fnames = glm_dl(dt, storm_name, True)
 
         print('Downloading ABI data for ' + storm_name + '-' + dt + '...\n')
 
@@ -239,7 +239,7 @@ def main():
 
         abi_fname = abi_dl(dt + '00', sector, band=13)
 
-        print('abi fname: ' + abi_fname + '...\n')
+        print('\nabi fname: ' + abi_fname + '...\n')
 
         print('Filtering GLM data for ' + storm_name + '-' + dt + '...\n')
 
@@ -248,13 +248,15 @@ def main():
         center_coords = (float(format(curr_row['lons'], '.3f')),
                             float(format(curr_row['lats'], '.3f')))
 
+        rmw = int(curr_row['rmw'])
+
         glm_data = accumulate_glm_data(dt, center_coords, storm_name)
 
         print('Parsing ABI data...\n')
         data_dict = read_file(abi_fname)
 
         print('Creating graphic for ' + storm_name + '-' + dt + '...\n')
-        plot_mercator(data_dict, glm_data, center_coords, storm_name)
+        plot_mercator(data_dict, glm_data, center_coords, rmw, storm_name)
 
         print('-----------------------------------------------------------------')
         #sys.exit(0) # For testing/debugging
