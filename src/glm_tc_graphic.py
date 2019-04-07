@@ -327,7 +327,7 @@ def plot_mercator(data_dict, glm_data, center_coords, rmw, storm_name):
                  fontsize = 15)
 
     # Draw the RMW
-    rmw_ring = geodesic_point_buffer(cent_lat, cent_lon, rmw)
+    rmw_ring = geodesic_point_buffer(cent_lat, cent_lon, rmw * 1.852) # convert nm to km
     lats = [float(x[1]) for x in rmw_ring.coords[:]]
     max_lat = max(lats)
 
