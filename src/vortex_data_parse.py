@@ -767,14 +767,5 @@ def track_interp(vdm_df, year, interval):
 
 
 
-
-
-
-
-
-
-def hello():
-    return('Hello from vortex_data_parse!')
-
 if __name__ == '__main__':
     print('glm_forecast_graphic: Calling module <vortex_data_parse> as main...')

@@ -14,15 +14,6 @@
  Weather and Forecasting, vol. 33, no. 1, 2018, pp. 23–36.,
  doi:10.1175/waf-d-17-0096.1.
 
-
- plot_geos(), georeference(), & plot_mercator() adapted from Brian Blaylock's
- code:
- https://github.com/blaylockbk/pyBKB_v2/blob/master/BB_goes16/mapping_GOES16_data.ipynb
-
-
- GOES-16 netCDF files used for testing retrieved from Brian Blaylock's
- Department of Atmospheric Science, University of Utah website:
- http://home.chpc.utah.edu/~u0553130/Brian_Blaylock/cgi-bin/goes16_download.cgi
 """
 
 

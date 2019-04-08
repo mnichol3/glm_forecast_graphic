@@ -1,5 +1,5 @@
 import unittest
-from src.vortex_data_parse import (hello, get_os, hours_mins_2_mins,
+from src.vortex_data_parse import (get_os, hours_mins_2_mins,
                                     dec_2_deg, calc_min_list)
 
 class TestVortexDataParse(unittest.TestCase):
@@ -10,10 +10,11 @@ class TestVortexDataParse(unittest.TestCase):
         self.assertTrue(True)
 
 
-
+    """
     def test_2(self):
         self.hello = hello()
         self.assertEqual(self.hello, 'Hello from vortex_data_parse!')
+    """
 
 
 
