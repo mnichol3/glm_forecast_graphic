@@ -11,13 +11,16 @@ TEMP DROP (dropsonde) aircraft observations
 import pandas as pd
 from urllib.request import urlopen
 import re
-import os.makedirs
+from os import makedirs
 from os.path import join, isfile, exists
 import sys
 import numpy as np
 #from . common import get_os, padding_zero, date_time_chunk
 from common import get_os, padding_zero, date_time_chunk
 import config
+import matplotlib.pyplot as plt
+import cartopy.crs as ccrs
+from cartopy.feature import NaturalEarthFeature
 
 
 
@@ -158,6 +161,7 @@ def tmpdrp_df(date_time_start, date_time_end, storm_name, octant = 'REPNT3'):
                    # and ";". We shall remove these
 
                    data = data_str.splitlines()
+                   data_str = "".join(data_str.splitlines())
 
                    if (storm_name in data_str):
 
@@ -177,8 +181,8 @@ def tmpdrp_df(date_time_start, date_time_end, storm_name, octant = 'REPNT3'):
                        if (curr_line[2][:2] == '99'):
                            curr_list.append(curr_line[2][2:4] + '.' + curr_line[2][4:])
                        else:
-                           print('Error parsing dropsonde latitude in ' + x + '
-                                 (temp_drop_parse.tmpdrp_df)')
+                           print('Error parsing dropsonde latitude in ' + x +
+                                 '(temp_drop_parse.tmpdrp_df)')
                            sys.exit(0)
 
                        # Longitude
@@ -186,19 +190,19 @@ def tmpdrp_df(date_time_start, date_time_end, storm_name, octant = 'REPNT3'):
                        curr_list.append(str(lon))
 
 
-                       dlm_wnd = re.search('DLM WND (\d{5})', data_str).group(1)
+                       dlm_wnd = re.search('DLM WND (\d{5})', data_str)
 
                        if (dlm_wnd):
                            curr_list.append(dlm_wnd.group(1))
                        else:
-                           print("Error parsing DLM WND (temp_drop_parse.tmpdrp_df)")
+                           print("\nError parsing DLM WND (temp_drop_parse.tmpdrp_df) " + x + "\n")
                            sys.exit(0)
 
                        data_list.append(curr_list)
 
             col_names = ['datetime', 'lat', 'lon', 'dlm_wind']
             tmpdrp_df = pd.DataFrame(data_list, columns=col_names, dtype=str)
-            tmpdrp_df = tmpdrp_df.sort_values(by=['A'])
+            tmpdrp_df = tmpdrp_df.sort_values(by=['datetime'])
             tmpdrp_df = tmpdrp_df.drop_duplicates(subset=col_names, keep='last')
 
             #new_fname = "tmpdrp-" + storm_name + "-" + date_time_start + "-" + date_time_end + ".txt"
@@ -312,5 +316,51 @@ def tmpdrp_interp(tmpdrp_df, datetimes=None):
 
 
 
+def plot_drop_points(tmpdrp_df):
+    """
+    Plots the location of dropsonde releases
+    """
 
-tmpdrp_df('201809010900', '201809140300', 'FLORENCE')
+    datetimes = tmpdrp_df['datetime'].tolist()
+    lats = tmpdrp_df['lat'].tolist()
+    lons = tmpdrp_df['lon'].tolist()
+
+    datetimes = [z[6:] for z in datetimes]
+    lats = [float(y) for y in lats]
+    lons = [float(x) for x in lons]
+
+    fig = plt.figure(figsize=(10, 5))
+
+    ax = fig.add_subplot(1, 1, 1, projection=ccrs.Mercator())
+
+    states = NaturalEarthFeature(category='cultural', scale='50m', facecolor='black',
+                             name='admin_1_states_provinces_shp')
+
+    land = NaturalEarthFeature('physical', 'land', '50m', facecolor='black')
+
+    ocean = NaturalEarthFeature('physical', 'ocean', '50m', facecolor='black')
+
+    ax.add_feature(land, linewidth=.8, edgecolor='gray', zorder = 1)
+    ax.add_feature(states, linewidth=.8, edgecolor='gray', zorder = 2)
+    ax.add_feature(ocean, linewidth=.8, edgecolor='gray', zorder = 0)
+
+    ax.scatter(lons, lats, transform=ccrs.PlateCarree(), marker = 'o', color = 'r', zorder=3)
+
+    for i, txt in enumerate(datetimes):
+        ax.annotate(txt, (lons[i], lats[i]))
+
+    """
+    for i, txt in enumerate(dt):
+        ax.annotate(txt, (lons[i], lats[i]), color = 'white', zorder = 4)
+    """
+
+    plt.axis('equal')
+    plt.title('Dropsondes')
+
+    plt.show()
+
+
+
+
+df = tmpdrp_df('201809111200', '201809112300', 'FLORENCE')
+plot_drop_points(df)
