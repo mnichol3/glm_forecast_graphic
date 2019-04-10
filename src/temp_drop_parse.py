@@ -196,22 +196,21 @@ def tmpdrp_df(date_time_start, date_time_end, storm_name, octant = 'REPNT3'):
                            curr_list.append(dlm_wnd.group(1))
                        else:
                            print("\nError parsing DLM WND (temp_drop_parse.tmpdrp_df) " + x + "\n")
-                           sys.exit(0)
+                           sys.exit(0) # Maybe remove?
 
                        data_list.append(curr_list)
 
             col_names = ['datetime', 'lat', 'lon', 'dlm_wind']
+
             tmpdrp_df = pd.DataFrame(data_list, columns=col_names, dtype=str)
             tmpdrp_df = tmpdrp_df.sort_values(by=['datetime'])
             tmpdrp_df = tmpdrp_df.drop_duplicates(subset=col_names, keep='last')
 
-            #new_fname = "tmpdrp-" + storm_name + "-" + date_time_start + "-" + date_time_end + ".txt"
-
             file_path = join(PATH_LINUX_TMPDRP, octant, year_start + '-' + storm_name)
+
             if not exists(file_path):
                 makedirs(file_path)
 
-            #abs_path = join(file_path, new_fname) # Defined at top of function
             with open(abs_path, 'w') as file:
                 tmpdrp_df.to_csv(file, sep = ',', header=False, index=False)
 
@@ -257,62 +256,6 @@ def read_tmpdrp_csv(fname):
     tmpdrp_df = tmpdrp_df.drop_duplicates(subset=col_names, keep='last')
 
     return tmpdrp_df
-
-
-
-def tmpdrp_interp(tmpdrp_df, datetimes=None):
-    """
-    This function takes a dataframe of accumulated dropsonde data and linearly
-    interpolates the time and low pressure center coordinates on 1-minute
-    intervals. The times used are measured as minutes since the first published
-    observation for that storm
-
-    Parameters
-    ----------
-    vdm_df : Pandas DataFrame
-        DataFrame containing accumulated VDM data
-
-        Columns:
-
-            2018+ files:
-                A : Date time
-                B : Latitude
-                C : Longitude
-                D : Minimum SLP
-                E : Inbound maximum surface wind, incl. bearing & range
-                F : Inbound maximum flight-level wind, incl. bearing & range
-                G : Outbound maximum surface wind, incl. bearing & range
-                H : Outbound maximum flight-level wind, incl. bearing & range
-                I : Aircfraft info
-
-            Files previous to 2018:
-                A : Date time
-                B : Latitude
-                C : Longitude
-                D : Minimum SLP
-                E : Inbound maximum surface wind, incl. bearing & range
-                F : Inbound maximum flight-level wind, incl. bearing & range
-                G : Outbound maximum flight-level wind, incl. bearing & range
-                H : Aircfraft info
-
-    year : str
-        Year the observations were taken
-
-    interval : str
-        String indicating whether to interpolate to 1-minute or 1-hour
-
-
-    Returns
-    -------
-    interp_vdf : Pandas Dataframe
-        Pandas Dataframe holding the interpolated data
-
-
-    Notes
-    -----
-
-
-    """
 
 
 
