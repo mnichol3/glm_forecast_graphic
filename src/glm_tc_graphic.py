@@ -37,7 +37,7 @@ from os import listdir
 from os.path import isfile, join
 from math import sin, cos, sqrt, atan2, radians
 from common import get_os
-from math import sin, cos, radians
+import math
 
 PATH_LINUX_ABI = '/media/mnichol3/easystore/data/abi'
 PATH_LINUX_GLM = '/media/mnichol3/easystore/data/glm'
@@ -552,6 +552,41 @@ def accumulate_glm_data(date_time, center_coords, storm_name):
 
 
 
+def add_arrow(line, position=None, direction='right', size=15, color=None):
+    """
+    add an arrow to a line.
+
+    line:       Line2D object
+    position:   x-position of the arrow. If None, mean of xdata is taken
+    direction:  'left' or 'right'
+    size:       size of the arrow in fontsize points
+    color:      if None, line color is taken.
+    """
+    if color is None:
+        color = line.get_color()
+
+    xdata = line.get_xdata()
+    ydata = line.get_ydata()
+
+    if position is None:
+        position = xdata.mean()
+    # find closest index
+    start_ind = np.argmin(np.absolute(xdata - position))
+    if direction == 'right':
+        end_ind = start_ind + 1
+    else:
+        end_ind = start_ind - 1
+
+    line.axes.annotate('',
+        xytext=(xdata[start_ind], ydata[start_ind]),
+        xy=(xdata[end_ind], ydata[end_ind]),
+        arrowprops=dict(arrowstyle="->", color=color),
+        size=size, transform=ccrs.PlateCarree()
+    )
+
+
+
+
 def shear_vector(ax, plt, center_lon, center_lat, wind, **kwargs):
     """
     Calculates and plots the environmental wind shear vector
@@ -578,13 +613,13 @@ def shear_vector(ax, plt, center_lon, center_lat, wind, **kwargs):
     wind_dir = int(wind[0])
     wind_spd = int(wind[1])
 
-    if (wind_dir > 90):
-        wind_x = cos(radians(wind_dir)) * -1
-        wind_y = sin(radians(wind_dir)) * -1
+    cartesianAngleRadians = (450-wind_dir)*math.pi/180.0
+    terminus_x = center_lon + 2 * math.cos(cartesianAngleRadians) * -1
+    terminus_y = center_lat + 2 * math.sin(cartesianAngleRadians) * -1
 
-    ax.arrow(center_lon, center_lat, wind_x, wind_y, transform=ccrs.PlateCarree(), **kwargs)
-    plt.plot([center_lon, center_lon + wind_x + 0.1], [center_lat, center_lat + wind_x + 0.1],
-            transform=ccrs.PlateCarree())
+    line = plt.plot([center_lon, terminus_x],[center_lat,terminus_y], transform=ccrs.PlateCarree())[0]
+    add_arrow(line, size=30)
+
 
 
 

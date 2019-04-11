@@ -43,7 +43,7 @@ def add_arrow(line, position=None, direction='right', size=15, color=None):
 
 
 def main():
-    wind = ('260', '5')
+    wind = ('090', '5')
     origin = (2, 3) # origin point
 
     origin_x = origin[0]
