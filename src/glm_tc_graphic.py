@@ -37,6 +37,7 @@ from os import listdir
 from os.path import isfile, join
 from math import sin, cos, sqrt, atan2, radians
 from common import get_os
+from math import sin, cos, radians
 
 PATH_LINUX_ABI = '/media/mnichol3/easystore/data/abi'
 PATH_LINUX_GLM = '/media/mnichol3/easystore/data/glm'
@@ -228,7 +229,7 @@ def plot_geos(data_dict):
 
 
 
-def plot_mercator(data_dict, glm_data, center_coords, rmw, wnd_shear, storm_name):
+def plot_mercator(data_dict, glm_data, center_coords, rmw, wind_shear, storm_name):
     """
     Plot the GOES-16 data on a lambert-conformal projection map. Includes ABI
     imagery, GLM flash data, 100km, 200km, & 300km range rings, and red "+" at
@@ -342,6 +343,10 @@ def plot_mercator(data_dict, glm_data, center_coords, rmw, wnd_shear, storm_name
     gl.yformatter = LATITUDE_FORMATTER
     gl.xlabel_style = {'color': 'red', 'weight': 'bold'}
     gl.ylabel_style = {'color': 'red', 'weight': 'bold'}
+
+    # Create shear vector
+    shear_vector(ax, plt, cent_lon, cent_lat, wind_shear, width=0.01, head_width=0.08,
+            head_length=0.1, fc='k', ec='k', zorder=15)
 
     plt.scatter(cent_lon,cent_lat, marker="+", color="r", transform=ccrs.PlateCarree(),
                 s = 200)
@@ -547,9 +552,41 @@ def accumulate_glm_data(date_time, center_coords, storm_name):
 
 
 
+def shear_vector(ax, plt, center_lon, center_lat, wind, **kwargs):
+    """
+    Calculates and plots the environmental wind shear vector
+
+    Parameters
+    ----------
+    ax : pyplot axis
+        Axis of the pyplot figure the arrow is to be plotted on
+    plt : pyplot plot
+        Plot of the figure the arrow is to be plotted on
+    center_lon : float
+        Longitude coordinate of the origin
+    center_lat : float
+        Latitude coordinate of the origin
+    wind : tuple of str
+        Tuple containing the wind direction and speed (in kts)
+        Format: (direction, speed)
+
+    Returns
+    -------
+    None (apparently this works)
+
+    """
+    wind_dir = int(wind[0])
+    wind_spd = int(wind[1])
+
+    if (wind_dir > 90):
+        wind_x = cos(radians(wind_dir)) * -1
+        wind_y = sin(radians(wind_dir)) * -1
+
+    ax.arrow(center_lon, center_lat, wind_x, wind_y, transform=ccrs.PlateCarree(), **kwargs)
+    plt.plot([center_lon, center_lon + wind_x + 0.1], [center_lat, center_lat + wind_x + 0.1],
+            transform=ccrs.PlateCarree())
+
+
+
 if __name__ == '__main__':
-    #data_dict = read_file()
-    #print(georeference(data_dict))
-    #plot_mercator(data_dict)
-    #plot_geos(data_dict)
     print('glm_forecast_graphic: Calling module <glm_tc_graphic> as main...')

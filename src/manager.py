@@ -258,13 +258,13 @@ def main():
 
         print('Retrieving wind shear data...\n')
         ships_data = ships_parse.fetch_file(dt + '00', storm_name, basin='AL', write=True)
-        wnd_shear = (ships_data['shear_dir'], ships_data['shear_spd'])
+        wind_shear = (ships_data['shear_dir'], ships_data['shear_spd'])
 
         print('Creating graphic for ' + storm_name + '-' + dt + '...\n')
-        plot_mercator(data_dict, glm_data, center_coords, rmw, wnd_shear, storm_name)
+        plot_mercator(data_dict, glm_data, center_coords, rmw, wind_shear, storm_name)
 
         print('-----------------------------------------------------------------')
-        #sys.exit(0) # For testing/debugging
+        sys.exit(0) # For testing/debugging
 
 
 if __name__ == "__main__":

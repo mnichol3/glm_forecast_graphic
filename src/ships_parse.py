@@ -240,9 +240,3 @@ def df_from_list(data_dict_list, storm_name, write=False):
             data_df.to_csv(file, sep = ',', header=False, index=False)
 
     return data_df
-
-
-
-
-print(fetch_file('201809101400', 'florence'))
-# date : 201809101400
