@@ -35,7 +35,7 @@ import csv
 BASE_URL = 'ftp://ftp.nhc.noaa.gov/atcf/stext'
 PATH_LINUX_SHIPS = '/media/mnichol3/easystore/data/SHIPS'
 
-def fetch_files(datetime, storm_name, basin='AL', write=False):
+def fetch_file(datetime, storm_name, basin='AL', write=False):
     """
     Locates and parses a SHIPS file for the given datetime & storm
 
@@ -244,5 +244,5 @@ def df_from_list(data_dict_list, storm_name, write=False):
 
 
 
-print(fetch_files('201809101400', 'florence'))
+print(fetch_file('201809101400', 'florence'))
 # date : 201809101400
