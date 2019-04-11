@@ -240,7 +240,7 @@ def main():
 
         abi_fname = abi_dl(dt + '00', sector, band=13)
 
-        print('\nabi fname: ' + abi_fname + '...\n')
+        print('\nabi fname: ' + abi_fname + '\n')
 
         print('Filtering GLM data for ' + storm_name + '-' + dt + '...\n')
 
@@ -264,8 +264,10 @@ def main():
         plot_mercator(data_dict, glm_data, center_coords, rmw, wind_shear, storm_name)
 
         print('-----------------------------------------------------------------')
-        sys.exit(0) # For testing/debugging
 
+        ##### !!! REMOVE !!! #####
+        sys.exit(0) # For testing/debugging
+        ##########################
 
 if __name__ == "__main__":
     main()
