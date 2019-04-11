@@ -11,7 +11,7 @@ TEMP DROP (dropsonde) aircraft observations
 import pandas as pd
 from urllib.request import urlopen
 import re
-import os.makedirs
+from os import makedirs
 from os.path import join, isfile, exists
 import sys
 import numpy as np
