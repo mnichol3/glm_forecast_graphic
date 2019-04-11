@@ -228,7 +228,7 @@ def plot_geos(data_dict):
 
 
 
-def plot_mercator(data_dict, glm_data, center_coords, rmw, storm_name):
+def plot_mercator(data_dict, glm_data, center_coords, rmw, wnd_shear, storm_name):
     """
     Plot the GOES-16 data on a lambert-conformal projection map. Includes ABI
     imagery, GLM flash data, 100km, 200km, & 300km range rings, and red "+" at
