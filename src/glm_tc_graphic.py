@@ -627,7 +627,7 @@ def shear_vector(ax, plt, center_lon, center_lat, wind, **kwargs):
     terminus_y = center_lat + 2 * math.sin(cartesianAngleRadians) * -1
 
     line = plt.plot([center_lon, terminus_x],[center_lat,terminus_y], transform=ccrs.PlateCarree())[0]
-    add_arrow(line, size=300)
+    #add_arrow(line, size=300)
 
 
 

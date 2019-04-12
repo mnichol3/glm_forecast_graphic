@@ -226,10 +226,10 @@ def main():
 
     for idx, dt in enumerate(datetimes):
 
-        print('Downloading GLM data for ' + storm_name + '-' + dt + '...\n')
+        print('Downloading GLM data for ' + storm_name + '-' + dt + '00...\n')
         glm_fnames = glm_dl(dt, storm_name, True)
 
-        print('Downloading ABI data for ' + storm_name + '-' + dt + '...\n')
+        print('Downloading ABI data for ' + storm_name + '-' + dt + '00...\n')
 
         if (int(dt) <= 2018091014):
             sector = 'meso2'
@@ -242,7 +242,7 @@ def main():
 
         print('\nabi fname: ' + abi_fname + '\n')
 
-        print('Filtering GLM data for ' + storm_name + '-' + dt + '...\n')
+        print('Filtering GLM data for ' + storm_name + '-' + dt + '00...\n')
 
         curr_row = coords.iloc[idx]
 
@@ -261,13 +261,13 @@ def main():
         ships_data = ships_parse.fetch_file(dt + '00', storm_name, basin='AL', write=True)
         wind_shear = (ships_data['shear_dir'], ships_data['shear_spd'])
 
-        print('Creating graphic for ' + storm_name + '-' + dt + '...\n')
+        print('Creating graphic for ' + storm_name + '-' + dt + '00...\n')
         plot_mercator(data_dict, glm_data, center_coords, rmw, wind_shear, storm_name)
 
         print('-----------------------------------------------------------------')
 
         ##### !!! REMOVE !!! #####
-        sys.exit(0) # For testing/debugging
+        #sys.exit(0) # For testing/debugging
         ##########################
 
 if __name__ == "__main__":
