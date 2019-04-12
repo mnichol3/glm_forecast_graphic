@@ -272,7 +272,8 @@ def plot_mercator(data_dict, glm_data, center_coords, rmw, wind_shear, storm_nam
     plt.title('GOES-16 Ch.' + str(data_dict['band_id']),
               fontweight='semibold', fontsize=10, loc='left')
 
-    plt.title(storm_name + ' - %s' % scan_date.strftime('%H:%M UTC %d %B %Y'),
+    plt.title((storm_name + ' - %s\nEnvironmental wind shear: ' + wind_shear[0]
+                + '/' + wind_shear[1]) % scan_date.strftime('%H:%M UTC %d %B %Y'),
               fontsize=10, loc='right')
 
     cent_lat = float(center_coords[1])
@@ -365,6 +366,7 @@ def plot_mercator(data_dict, glm_data, center_coords, rmw, wind_shear, storm_nam
     # Increase font size of colorbar tick labels
     plt.setp(cbar.ax.yaxis.get_ticklabels(), fontsize=12)
     cbar.set_label('Radiance (' + data_dict['data_units'] + ')', fontsize = 14, labelpad = 20)
+
     plt.tight_layout()
 
     fig = plt.gcf()
