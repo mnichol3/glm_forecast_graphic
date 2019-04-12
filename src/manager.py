@@ -20,6 +20,7 @@ from os.path import isdir, isfile, join
 from glm_tc_graphic import accumulate_glm_data, plot_mercator, read_file
 from common import get_os
 import utils
+import ships_parse
 
 PATH_LINUX = '/media/mnichol3/easystore/data'
 PATH_LINUX_OUT = '/media/mnichol3/easystore/data/imgs'
@@ -170,7 +171,7 @@ def make_dir(dirs):
                 print ("Creation of the directory %s failed" % p)
                 sys.exit(0)
             else:
-                print ("Created the directory %s" % p)
+                print ("Created the directory %s ..." % p)
 
 
 
@@ -192,7 +193,7 @@ def main():
 
     storm_dict = {'FLORENCE': ['201809010900', '201809140300', 'meso2']}
 
-    subdirs = ['abi', 'glm', 'vdm', 'imgs']
+    subdirs = ['abi', 'glm', 'vdm', 'imgs', 'SHIPS']
     default_octant = "REPNT2"
 
     print('\nProcessing storm: ' + year + '-' + storm_name + '\n')
@@ -225,10 +226,10 @@ def main():
 
     for idx, dt in enumerate(datetimes):
 
-        print('Downloading GLM data for ' + storm_name + '-' + dt + '...\n')
+        print('Downloading GLM data for ' + storm_name + '-' + dt + '00...\n')
         glm_fnames = glm_dl(dt, storm_name, True)
 
-        print('Downloading ABI data for ' + storm_name + '-' + dt + '...\n')
+        print('Downloading ABI data for ' + storm_name + '-' + dt + '00...\n')
 
         if (int(dt) <= 2018091014):
             sector = 'meso2'
@@ -239,12 +240,13 @@ def main():
 
         abi_fname = abi_dl(dt + '00', sector, band=13)
 
-        print('\nabi fname: ' + abi_fname + '...\n')
+        print('\nabi fname: ' + abi_fname + '\n')
 
-        print('Filtering GLM data for ' + storm_name + '-' + dt + '...\n')
+        print('Filtering GLM data for ' + storm_name + '-' + dt + '00...\n')
 
         curr_row = coords.iloc[idx]
 
+        # NOTE: Longitude is never decoded as negative, even when it should be
         center_coords = (float(format(curr_row['lons'], '.3f')),
                             float(format(curr_row['lats'], '.3f')))
 
@@ -255,12 +257,18 @@ def main():
         print('Parsing ABI data...\n')
         data_dict = read_file(abi_fname)
 
-        print('Creating graphic for ' + storm_name + '-' + dt + '...\n')
-        plot_mercator(data_dict, glm_data, center_coords, rmw, storm_name)
+        print('Retrieving wind shear data...\n')
+        ships_data = ships_parse.fetch_file(dt + '00', storm_name, basin='AL', write=True)
+        wind_shear = (ships_data['shear_dir'], ships_data['shear_spd'])
+
+        print('Creating graphic for ' + storm_name + '-' + dt + '00...\n')
+        plot_mercator(data_dict, glm_data, center_coords, rmw, wind_shear, storm_name)
 
         print('-----------------------------------------------------------------')
-        #sys.exit(0) # For testing/debugging
 
+        ##### !!! REMOVE !!! #####
+        #sys.exit(0) # For testing/debugging
+        ##########################
 
 if __name__ == "__main__":
     main()

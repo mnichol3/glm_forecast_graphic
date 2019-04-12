@@ -37,6 +37,7 @@ from os import listdir
 from os.path import isfile, join
 from math import sin, cos, sqrt, atan2, radians
 from common import get_os
+import math
 
 PATH_LINUX_ABI = '/media/mnichol3/easystore/data/abi'
 PATH_LINUX_GLM = '/media/mnichol3/easystore/data/glm'
@@ -228,7 +229,7 @@ def plot_geos(data_dict):
 
 
 
-def plot_mercator(data_dict, glm_data, center_coords, rmw, storm_name):
+def plot_mercator(data_dict, glm_data, center_coords, rmw, wind_shear, storm_name):
     """
     Plot the GOES-16 data on a lambert-conformal projection map. Includes ABI
     imagery, GLM flash data, 100km, 200km, & 300km range rings, and red "+" at
@@ -271,7 +272,8 @@ def plot_mercator(data_dict, glm_data, center_coords, rmw, storm_name):
     plt.title('GOES-16 Ch.' + str(data_dict['band_id']),
               fontweight='semibold', fontsize=10, loc='left')
 
-    plt.title(storm_name + ' - %s' % scan_date.strftime('%H:%M UTC %d %B %Y'),
+    plt.title((storm_name + ' - %s\nEnvironmental wind shear: ' + wind_shear[0]
+                + '/' + wind_shear[1]) % scan_date.strftime('%H:%M UTC %d %B %Y'),
               fontsize=10, loc='right')
 
     cent_lat = float(center_coords[1])
@@ -343,6 +345,10 @@ def plot_mercator(data_dict, glm_data, center_coords, rmw, storm_name):
     gl.xlabel_style = {'color': 'red', 'weight': 'bold'}
     gl.ylabel_style = {'color': 'red', 'weight': 'bold'}
 
+    # Create shear vector
+    shear_vector(ax, plt, cent_lon, cent_lat, wind_shear, width=0.01, head_width=0.08,
+            head_length=0.1, fc='k', ec='k', zorder=15)
+
     plt.scatter(cent_lon,cent_lat, marker="+", color="r", transform=ccrs.PlateCarree(),
                 s = 200)
 
@@ -360,6 +366,7 @@ def plot_mercator(data_dict, glm_data, center_coords, rmw, storm_name):
     # Increase font size of colorbar tick labels
     plt.setp(cbar.ax.yaxis.get_ticklabels(), fontsize=12)
     cbar.set_label('Radiance (' + data_dict['data_units'] + ')', fontsize = 14, labelpad = 20)
+
     plt.tight_layout()
 
     fig = plt.gcf()
@@ -432,7 +439,7 @@ def calc_dist(coords1, coords2):
 
     lon1 = radians(coords1[0])
     lat1 = radians(coords1[1])
-    lon2 = radians(coords2[0])
+    lon2 = radians(coords2[0]) * -1
     lat2 = radians(coords2[1])
 
     dlon = lon2 - lon1
@@ -477,6 +484,8 @@ def accumulate_glm_data(date_time, center_coords, storm_name):
     """
     flash_lats = np.array([])
     flash_lons = np.array([])
+    flash_lats_filtered = []
+    flash_lons_filtered = []
 
     if (type(date_time) == str):
         date_time = [date_time]
@@ -539,17 +548,89 @@ def accumulate_glm_data(date_time, center_coords, storm_name):
     #glm_data = list(zip(flash_lons, flash_lats))
     glm_data = (flash_lons, flash_lats)
 
-    # Filter out flashes greater than 450 km away from the low pressure center
-    #glm_data_filtered = [x for x in glm_data if calc_dist(x, center_coords) < 500.0]
 
-    #return glm_data_filtered
-    return glm_data
+    # Filter out flashes greater than 500 km away from the low pressure center
+    for idx, curr_lon in enumerate(glm_data[0]):
+        curr_lat = glm_data[1][idx]
+
+        if (calc_dist((curr_lon, curr_lat), center_coords) < 500.0):
+            flash_lons_filtered.append(curr_lon)
+            flash_lats_filtered.append(curr_lat)
+
+    return (flash_lons_filtered, flash_lats_filtered)
+
+
+
+def add_arrow(line, position=None, direction='right', size=15, color=None):
+    """
+    add an arrow to a line.
+
+    line:       Line2D object
+    position:   x-position of the arrow. If None, mean of xdata is taken
+    direction:  'left' or 'right'
+    size:       size of the arrow in fontsize points
+    color:      if None, line color is taken.
+    """
+    if color is None:
+        color = line.get_color()
+
+    xdata = line.get_xdata()
+    ydata = line.get_ydata()
+
+    if position is None:
+        position = xdata.mean()
+    # find closest index
+    start_ind = np.argmin(np.absolute(xdata - position))
+    if direction == 'right':
+        end_ind = start_ind + 1
+    else:
+        end_ind = start_ind - 1
+
+    line.axes.annotate('',
+        xytext=(xdata[start_ind], ydata[start_ind]),
+        xy=(xdata[end_ind], ydata[end_ind]),
+        arrowprops=dict(arrowstyle="->", color=color),
+        size=size, transform=ccrs.PlateCarree()
+    )
+
+
+
+
+def shear_vector(ax, plt, center_lon, center_lat, wind, **kwargs):
+    """
+    Calculates and plots the environmental wind shear vector
+
+    Parameters
+    ----------
+    ax : pyplot axis
+        Axis of the pyplot figure the arrow is to be plotted on
+    plt : pyplot plot
+        Plot of the figure the arrow is to be plotted on
+    center_lon : float
+        Longitude coordinate of the origin
+    center_lat : float
+        Latitude coordinate of the origin
+    wind : tuple of str
+        Tuple containing the wind direction and speed (in kts)
+        Format: (direction, speed)
+
+    Returns
+    -------
+    None (apparently this works)
+
+    """
+    wind_dir = int(wind[0])
+    wind_spd = int(wind[1])
+
+    cartesianAngleRadians = (450-wind_dir)*math.pi/180.0
+    terminus_x = center_lon + 2 * math.cos(cartesianAngleRadians) * -1
+    terminus_y = center_lat + 2 * math.sin(cartesianAngleRadians) * -1
+
+    line = plt.plot([center_lon, terminus_x],[center_lat,terminus_y], transform=ccrs.PlateCarree())[0]
+    #add_arrow(line, size=300)
+
 
 
 
 if __name__ == '__main__':
-    #data_dict = read_file()
-    #print(georeference(data_dict))
-    #plot_mercator(data_dict)
-    #plot_geos(data_dict)
     print('glm_forecast_graphic: Calling module <glm_tc_graphic> as main...')

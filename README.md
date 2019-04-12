@@ -26,6 +26,7 @@ This package recreates the tropical cyclone intensity change forecasting graphic
   - GOES-16
     - Advanced Baseline Imager (ABI)
     - Geostationary Lightning Mapper (GLM)
+  - Statistical Hurricane Intensity Prediction Scheme (SHIPS)
 - National Hurricane Center (NHC)
   - NOAA Aircraft Operations Center (AOC) & USAFRC 53rd Weather Reconnaissance Squadron (53rd WRS)
     - Vortex Data Message (VDM)
