@@ -246,6 +246,7 @@ def main():
 
         curr_row = coords.iloc[idx]
 
+        # NOTE: Longitude is never decoded as negative, even when it should be
         center_coords = (float(format(curr_row['lons'], '.3f')),
                             float(format(curr_row['lats'], '.3f')))
 

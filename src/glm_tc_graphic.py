@@ -439,7 +439,7 @@ def calc_dist(coords1, coords2):
 
     lon1 = radians(coords1[0])
     lat1 = radians(coords1[1])
-    lon2 = radians(coords2[0])
+    lon2 = radians(coords2[0]) * -1
     lat2 = radians(coords2[1])
 
     dlon = lon2 - lon1
@@ -484,6 +484,8 @@ def accumulate_glm_data(date_time, center_coords, storm_name):
     """
     flash_lats = np.array([])
     flash_lons = np.array([])
+    flash_lats_filtered = []
+    flash_lons_filtered = []
 
     if (type(date_time) == str):
         date_time = [date_time]
@@ -546,11 +548,18 @@ def accumulate_glm_data(date_time, center_coords, storm_name):
     #glm_data = list(zip(flash_lons, flash_lats))
     glm_data = (flash_lons, flash_lats)
 
-    # Filter out flashes greater than 450 km away from the low pressure center
-    #glm_data_filtered = [x for x in glm_data if calc_dist(x, center_coords) < 500.0]
 
-    #return glm_data_filtered
-    return glm_data
+    # Filter out flashes greater than 500 km away from the low pressure center
+    for idx, curr_lon in enumerate(glm_data[0]):
+        curr_lat = glm_data[1][idx]
+        
+        if (calc_dist((curr_lon, curr_lat), center_coords) < 500.0):
+            flash_lons_filtered.append(curr_lon)
+            flash_lats_filtered.append(curr_lat)
+
+    return (flash_lons_filtered, flash_lats_filtered)
+
+    #return glm_data
 
 
 
