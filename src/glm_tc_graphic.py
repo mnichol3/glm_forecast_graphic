@@ -552,14 +552,12 @@ def accumulate_glm_data(date_time, center_coords, storm_name):
     # Filter out flashes greater than 500 km away from the low pressure center
     for idx, curr_lon in enumerate(glm_data[0]):
         curr_lat = glm_data[1][idx]
-        
+
         if (calc_dist((curr_lon, curr_lat), center_coords) < 500.0):
             flash_lons_filtered.append(curr_lon)
             flash_lats_filtered.append(curr_lat)
 
     return (flash_lons_filtered, flash_lats_filtered)
-
-    #return glm_data
 
 
 
