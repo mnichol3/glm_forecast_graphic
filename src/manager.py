@@ -21,6 +21,7 @@ from glm_tc_graphic import accumulate_glm_data, plot_mercator, read_file
 from common import get_os
 import utils
 import ships_parse
+import hovmoller
 
 PATH_LINUX = '/media/mnichol3/easystore/data'
 PATH_LINUX_OUT = '/media/mnichol3/easystore/data/imgs'
@@ -264,10 +265,12 @@ def main():
         print('Creating graphic for ' + storm_name + '-' + dt + '00...\n')
         plot_mercator(data_dict, glm_data, center_coords, rmw, wind_shear, storm_name)
 
+        print('Gathering data to create flash hovmoller...\n')
+        hovmoller.histogram(glm_data, center_coords)
         print('-----------------------------------------------------------------')
 
         ##### !!! REMOVE !!! #####
-        #sys.exit(0) # For testing/debugging
+        sys.exit(0) # For testing/debugging
         ##########################
 
 if __name__ == "__main__":
