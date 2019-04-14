@@ -42,20 +42,21 @@ def hovmoller_plot(hist_fname, bins_fname=None):
     Xs = [0, 25, 50, 75, 100, 125, 150, 175, 200, 225, 250, 275, 300, 325, 350,
           375]
 
-    with open(fname, 'r') as f:
+    with open(hist_fname, 'r') as f:
         for line in f:
             line = line.rstrip()
             line = line.split(' ')
-            Ys.append(line[0])
+            Ys.append(line[0][:8] + "-" + line[0][8:] + "z")
             rmws.append(line[1])
             data_list.append(line[2:])
 
     fig = plt.figure(figsize=(10, 5))
+    ax = plt.gca()
 
     cmap = plt.get_cmap('hot')
-    print(len(Xs))
 
     im = plt.contourf(Xs, Ys, data_list, levels=Xs,cmap=cmap)
+    ax.yaxis.set_major_locator(plt.MaxNLocator(20))
     fig.tight_layout()
 
     plt.show()
@@ -67,5 +68,5 @@ def hovmoller_plot(hist_fname, bins_fname=None):
 
 
 hist_fname = '/media/mnichol3/easystore/data/hist/FLORENCE-2018.txt'
-bins_fname
-data = hovmoller_plot(fname)
+#bins_fname
+data = hovmoller_plot(hist_fname)
