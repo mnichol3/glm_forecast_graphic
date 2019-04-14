@@ -1,6 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from glm_tc_graphic import calc_dist
+import pandas as pd
+import matplotlib
+
 
 def histogram(glm_coords, center_coords):
     dist = []
@@ -18,13 +21,51 @@ def histogram(glm_coords, center_coords):
     #    350. 375. 400.]
     hist, bins = np.histogram(dist, bins=16, range=(0,400))
 
-    """
-    width = 0.7 * (bins[1] - bins[0])
-    center = (bins[:-1] + bins[1:]) / 2
-    plt.bar(center, hist, align='center', width=width)
-    plt.show()
-    """
     # [ 12   5   0  11 459 323 452 220 271  82  48  69  44   5  99  27]
-    # hist[0] = 12
-    #print(hist)
     return hist, bins
+
+
+# TODO: Add bins_fname param to dynamically get bin array length
+def hovmoller_plot(hist_fname, bins_fname=None):
+    """
+    Creates a hovmoller plot of lightning flash density
+
+    Parameters
+    ----------
+    fname : str
+        Path & filename of a storm's histogram data file
+    """
+
+    data_list = []
+    Ys = []
+    rmws = []
+    Xs = [0, 25, 50, 75, 100, 125, 150, 175, 200, 225, 250, 275, 300, 325, 350,
+          375]
+
+    with open(fname, 'r') as f:
+        for line in f:
+            line = line.rstrip()
+            line = line.split(' ')
+            Ys.append(line[0])
+            rmws.append(line[1])
+            data_list.append(line[2:])
+
+    fig = plt.figure(figsize=(10, 5))
+
+    cmap = plt.get_cmap('hot')
+    print(len(Xs))
+
+    im = plt.contourf(Xs, Ys, data_list, levels=Xs,cmap=cmap)
+    fig.tight_layout()
+
+    plt.show()
+
+
+
+
+
+
+
+hist_fname = '/media/mnichol3/easystore/data/hist/FLORENCE-2018.txt'
+bins_fname
+data = hovmoller_plot(fname)
