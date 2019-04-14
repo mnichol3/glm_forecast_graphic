@@ -349,6 +349,11 @@ def plot_mercator(data_dict, glm_data, center_coords, rmw, wind_shear, storm_nam
     shear_vector(ax, plt, cent_lon, cent_lat, wind_shear, width=0.01, head_width=0.08,
             head_length=0.1, fc='k', ec='k', zorder=15)
 
+    bbox = quadrant_bounding_box((cent_lon, cent_lat), wind_shear[0])
+
+    for coords in bbox:
+        plt.plot([cent_lon, coords[0]],[cent_lat,coords[1]], transform=ccrs.PlateCarree())
+
     plt.scatter(cent_lon,cent_lat, marker="+", color="r", transform=ccrs.PlateCarree(),
                 s = 200)
 
@@ -624,11 +629,69 @@ def shear_vector(ax, plt, center_lon, center_lat, wind, **kwargs):
     wind_spd = int(wind[1])
 
     cartesianAngleRadians = (450-wind_dir)*math.pi/180.0
+
+    # Multiply by -1 for correct wind vector direction
     terminus_x = center_lon + 2 * math.cos(cartesianAngleRadians) * -1
     terminus_y = center_lat + 2 * math.sin(cartesianAngleRadians) * -1
 
     line = plt.plot([center_lon, terminus_x],[center_lat,terminus_y], transform=ccrs.PlateCarree())[0]
     #add_arrow(line, size=300)
+
+
+
+def quadrant_bounding_box(center_coords, wind_dir):
+    angles = [0, 45, 90, 135, 180, 225, 270, 315]
+    bbox = []
+    r_earth = 6371  # km
+    wind_dir = int(wind_dir)
+
+    if (wind_dir <= 180):
+        wind_dir += 180
+    else:
+        wind_dir -= 180
+
+    cent_lon = math.radians(center_coords[0])
+    cent_lat = math.radians(center_coords[1])
+
+    #r_dist = math.sqrt(400**2 + 400**2) / r_earth
+    r_dist = 400 / r_earth
+
+    for angle in angles:
+        curr_bear = wind_dir + angle
+
+        if (curr_bear > 360):
+            curr_bear -= 360
+        elif (curr_bear < 0):
+            curr_bear += 360
+
+        bearing = math.radians(curr_bear)
+
+        """
+        r_lat = math.asin(math.sin(cent_lat) * math.cos(r_dist) + math.cos(cent_lat) *
+                          math.sin(r_dist) * math.cos(bearing))
+
+        if (math.cos(r_lat) == 0 or abs(math.cos(r_lat)) < 0.000001):
+            r_lon = cent_lon
+        else:
+            r_lon = ((cent_lon - math.asin( math.sin(bearing) * math.sin(r_dist) / math.cos(r_lat))
+                     + math.pi ) % (2 * math.pi)) - math.pi
+        """
+
+        lat2 = math.asin( math.sin(cent_lat)*math.cos(r_dist) +
+                          math.cos(cent_lat)*math.sin(r_dist)*math.cos(bearing))
+        lon2 = cent_lon + math.atan2(math.sin(bearing)*math.sin(r_dist)*math.cos(cent_lat),
+                                 math.cos(r_dist)-math.sin(cent_lat)*math.sin(lat2))
+
+        lat = math.degrees(lat2)
+        lon = math.degrees(lon2)
+
+        bbox.append((lon, lat))
+
+    # [DS right, US right, US left, DS left]
+    return bbox
+
+
+
 
 
 

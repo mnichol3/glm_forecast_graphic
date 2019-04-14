@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from glm_tc_graphic import calc_dist
 import pandas as pd
 import matplotlib
+from glm_tc_graphic import quadrant_bounding_box
 
 
 def histogram(glm_coords, center_coords):
@@ -67,6 +68,7 @@ def hovmoller_plot(hist_fname, bins_fname=None):
 
 
 
-hist_fname = '/media/mnichol3/easystore/data/hist/FLORENCE-2018.txt'
+#hist_fname = '/media/mnichol3/easystore/data/hist/FLORENCE-2018.txt'
 #bins_fname
-data = hovmoller_plot(hist_fname)
+#data = hovmoller_plot(hist_fname)
+#quadrant_bounding_box((-76.48, 38.98), 0)
