@@ -27,4 +27,4 @@ def histogram(glm_coords, center_coords):
     # [ 12   5   0  11 459 323 452 220 271  82  48  69  44   5  99  27]
     # hist[0] = 12
     #print(hist)
-    return hist
+    return hist, bins
