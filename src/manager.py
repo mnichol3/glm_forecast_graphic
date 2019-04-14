@@ -14,8 +14,9 @@ produce the output
 from aws_dl import abi_dl, glm_dl
 import vortex_data_parse as vdp
 import sys
-from os import listdir, mkdir
-from os.path import isdir, isfile, join
+from os import listdir, mkdir, remove
+from os.path import isdir, isfile, join, exists
+import numpy as np
 #import utils
 from glm_tc_graphic import accumulate_glm_data, plot_mercator, read_file
 from common import get_os
@@ -24,7 +25,8 @@ import ships_parse
 import hovmoller
 
 PATH_LINUX = '/media/mnichol3/easystore/data'
-PATH_LINUX_OUT = '/media/mnichol3/easystore/data/imgs'
+PATH_LINUX_OUT = PATH_LINUX + '/imgs'
+PATH_LINUX_HIST = PATH_LINUX + '/hist'
 PATH_WIN = r'D:\Documents\senior-research-data\data'
 
 
@@ -197,6 +199,12 @@ def main():
     subdirs = ['abi', 'glm', 'vdm', 'imgs', 'SHIPS']
     default_octant = "REPNT2"
 
+    hist_fname = storm_name + "-" + year + ".txt"
+    hist_path = PATH_LINUX_HIST + "/" + hist_fname
+
+    if (exists(hist_path)):
+        remove(hist_path)
+
     print('\nProcessing storm: ' + year + '-' + storm_name + '\n')
 
     print('Creating data directories...\n')
@@ -227,10 +235,12 @@ def main():
 
     for idx, dt in enumerate(datetimes):
 
-        print('Downloading GLM data for ' + storm_name + '-' + dt + '00...\n')
+        curr_storm_dt = storm_name + '-' + dt + '00z'
+
+        print('Downloading GLM data for ' + curr_storm_dt + '...\n')
         glm_fnames = glm_dl(dt, storm_name, True)
 
-        print('Downloading ABI data for ' + storm_name + '-' + dt + '00...\n')
+        print('Downloading ABI data for ' + curr_storm_dt + '...\n')
 
         if (int(dt) <= 2018091014):
             sector = 'meso2'
@@ -243,7 +253,7 @@ def main():
 
         print('\nabi fname: ' + abi_fname + '\n')
 
-        print('Filtering GLM data for ' + storm_name + '-' + dt + '00...\n')
+        print('Filtering GLM data for ' + curr_storm_dt + '...\n')
 
         curr_row = coords.iloc[idx]
 
@@ -262,16 +272,30 @@ def main():
         ships_data = ships_parse.fetch_file(dt + '00', storm_name, basin='AL', write=True)
         wind_shear = (ships_data['shear_dir'], ships_data['shear_spd'])
 
-        print('Creating graphic for ' + storm_name + '-' + dt + '00...\n')
+        print('Creating graphic for ' + curr_storm_dt + '...\n')
         plot_mercator(data_dict, glm_data, center_coords, rmw, wind_shear, storm_name)
 
-        print('Gathering data to create flash hovmoller...\n')
-        hovmoller.histogram(glm_data, center_coords)
+        print('Writing flash histogram data to file...\n')
+        hist, bins = hovmoller.histogram(glm_data, center_coords)
+        hist = np.insert(hist, 0, rmw, axis=0)
+        hist = np.insert(hist, 0, dt + "00", axis=0)
+
+        with open(hist_path, 'a') as f:
+            np.savetxt(f, hist, fmt="%01.1d", delimiter=",", newline=" ")
+            f.write("\n")
+
+        print('-----------------------------------------------------------------')
         print('-----------------------------------------------------------------')
 
         ##### !!! REMOVE !!! #####
-        sys.exit(0) # For testing/debugging
+        #sys.exit(0) # For testing/debugging
         ##########################
+
+    print("Writing histogram bin metedata to file...\n")
+    with open(PATH_LINUX_HIST + "/" + storm_name + "-" + year + "-bins.txt", 'w') as f:
+        np.savetxt(f, bins, fmt="%01.1d", delimiter=",", newline=" ")
+
+    print("Finished processing " + storm_name + " " + start_date + "-" + end_date)
 
 if __name__ == "__main__":
     main()

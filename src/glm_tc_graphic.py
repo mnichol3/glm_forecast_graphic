@@ -375,6 +375,7 @@ def plot_mercator(data_dict, glm_data, center_coords, rmw, wind_shear, storm_nam
                 scan_date.strftime('%Y%m%d-%H%M')) + '.png', dpi=500)
 
     #plt.show()
+    plt.close(fig)
 
 
 
