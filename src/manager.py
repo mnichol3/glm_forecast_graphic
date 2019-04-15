@@ -196,6 +196,11 @@ def main():
 
     storm_dict = {'FLORENCE': ['201809010900', '201809140300', 'meso2']}
 
+    bad_glm_datetimes = ['2018091015', '2018091016', '2018091017', '2018091018',
+                         '2018091019', '2018091020', '2018091021', '2018091115',
+                         '2018091115', '2018091116', '2018091117', '2018091118',
+                         '2018091119', '2018091120', '2018091121']
+
     subdirs = ['abi', 'glm', 'vdm', 'imgs', 'SHIPS']
     default_octant = "REPNT2"
 
@@ -267,6 +272,10 @@ def main():
         rmw = int(curr_row['rmw'])
 
         glm_data = glm_tc_graphic.accumulate_glm_data(dt, center_coords, storm_name)
+
+        if (dt in bad_glm_datetimes):
+            glm_data = glm_tc_graphic.filter_flash_errors(glm_data, (-72, 25.6),
+                                                          (-56.44, 26.2))
 
         print('Parsing ABI data...\n')
         data_dict = glm_tc_graphic.read_file(abi_fname)

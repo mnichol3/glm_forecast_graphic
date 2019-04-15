@@ -801,6 +801,49 @@ def sort_glm_coords(quadrant_polys, glm_coords):
 
 
 
+def filter_flash_errors(glm_data, LL_coords, UR_coords):
+    """
+    There appears to be dense lines of erroneous flashes around 26 N on
+    10 Sep & 11 Sep from 1500-2100z. This function will remove these, but is unable
+    to distinguish if a flash is genuine or erroneous.
+
+    Parameters
+    ----------
+    glm_data : list of str
+        List of GLM flash latitudes & longitudes
+    LL_coords : tuple of str
+        Lower lefthand coordinates of the bounding box contaning the area
+        of false flashes
+    UR_coords : tuple of str
+        Upper righthand coordinates of the bounding box contaning the area
+        of false flashes
+
+    Returns
+    -------
+    filtered_flashes : tuple of lists
+        Filtered GLM flash coordinates. Format: (flash_lons, flash_lats)
+    """
+    filtered_lons = []
+    filtered_lats = []
+
+    lons = glm_data[0]
+    lats = glm_data[1]
+
+    min_lat = LL_coords[1]
+    max_lat = UR_coords[1]
+
+    min_lon = LL_coords[0]
+    max_lon = UR_coords[0]
+
+    for idx, lon in enumerate(lons):
+        lat = lats[idx]
+
+        if ((lat < min_lat or lat > max_lat) or (lon < min_lon or lon > max_lon)):
+            filtered_lons.append(lon)
+            filtered_lats.append(lat)
+
+    return (filtered_lons, filtered_lats)
+
 
 
 
