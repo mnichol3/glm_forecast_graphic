@@ -29,7 +29,9 @@ from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 import matplotlib.cm as cm
 from cartopy.feature import NaturalEarthFeature
 from shapely.ops import transform
-from shapely.geometry import Point
+from shapely.geometry import Point, LineString
+from shapely.geometry import Polygon as shp_Polygon
+from shapely.ops import polygonize
 from matplotlib.patches import Polygon
 from functools import partial
 import sys
@@ -277,7 +279,7 @@ def plot_mercator(data_dict, glm_data, center_coords, rmw, wind_shear, storm_nam
               fontsize=10, loc='right')
 
     cent_lat = float(center_coords[1])
-    cent_lon = float(center_coords[0]) * -1
+    cent_lon = float(center_coords[0])
 
     lim_coords = geodesic_point_buffer(cent_lat, cent_lon, 400)
     lats = [float(x[1]) for x in lim_coords.coords[:]]
@@ -319,6 +321,11 @@ def plot_mercator(data_dict, glm_data, center_coords, rmw, wind_shear, storm_nam
         plt.text(cent_lon, max_lat + 0.05, str(x) + " km", color = "r", horizontalalignment="center", transform=ccrs.PlateCarree(),
                  fontsize = 15)
 
+    # Create 400 km range polygon
+    coord_list = geodesic_point_buffer(cent_lat, cent_lon, 400)
+    bounding_poly = shp_Polygon(coord_list)
+
+
     # Draw the RMW
     rmw_ring = geodesic_point_buffer(cent_lat, cent_lon, rmw * 1.852) # convert nm to km
     lats = [float(x[1]) for x in rmw_ring.coords[:]]
@@ -349,10 +356,12 @@ def plot_mercator(data_dict, glm_data, center_coords, rmw, wind_shear, storm_nam
     shear_vector(ax, plt, cent_lon, cent_lat, wind_shear, width=0.01, head_width=0.08,
             head_length=0.1, fc='k', ec='k', zorder=15)
 
+    """
     bbox = quadrant_bounding_box((cent_lon, cent_lat), wind_shear[0])
 
     for coords in bbox:
         plt.plot([cent_lon, coords[0]],[cent_lat,coords[1]], transform=ccrs.PlateCarree())
+    """
 
     plt.scatter(cent_lon,cent_lat, marker="+", color="r", transform=ccrs.PlateCarree(),
                 s = 200)
@@ -381,6 +390,8 @@ def plot_mercator(data_dict, glm_data, center_coords, rmw, wind_shear, storm_nam
 
     #plt.show()
     plt.close(fig)
+
+    return bounding_poly
 
 
 
@@ -445,7 +456,7 @@ def calc_dist(coords1, coords2):
 
     lon1 = radians(coords1[0])
     lat1 = radians(coords1[1])
-    lon2 = radians(coords2[0]) * -1
+    lon2 = radians(coords2[0])
     lat2 = radians(coords2[1])
 
     dlon = lon2 - lon1
@@ -640,7 +651,7 @@ def shear_vector(ax, plt, center_lon, center_lat, wind, **kwargs):
 
 
 def quadrant_bounding_box(center_coords, wind_dir):
-    angles = [0, 45, 90, 135, 180, 225, 270, 315]
+    angles = [0, 90, 180, 270]
     bbox = []
     r_earth = 6371  # km
     wind_dir = int(wind_dir)
@@ -654,7 +665,7 @@ def quadrant_bounding_box(center_coords, wind_dir):
     cent_lat = math.radians(center_coords[1])
 
     #r_dist = math.sqrt(400**2 + 400**2) / r_earth
-    r_dist = 400 / r_earth
+    r_dist = 450 / r_earth
 
     for angle in angles:
         curr_bear = wind_dir + angle
@@ -690,6 +701,103 @@ def quadrant_bounding_box(center_coords, wind_dir):
     # [DS right, US right, US left, DS left]
     return bbox
 
+
+
+def bbox_poly(center_coords, wind_dir, bounding_poly):
+    bbox = quadrant_bounding_box(center_coords, wind_dir)
+
+    parallel_1 = bbox[0]
+    parallel_2 = bbox[2]
+
+    perp_1 = bbox[1]
+    perp_2 = bbox[3]
+
+    parallel_line = LineString([parallel_1, parallel_2])
+    perp_line = LineString([perp_1, perp_2])
+
+    shear_LR = parallel_line.union(LineString(list(bounding_poly.exterior.coords)))
+
+    shear_LR = polygonize(shear_LR)
+
+    shear_L = next(shear_LR)
+    shear_R = next(shear_LR)
+
+    """
+    x,y = result_R.exterior.coords.xy
+
+    fig = plt.figure(1, figsize=(5,5), dpi=90)
+    ax = fig.add_subplot(111)
+    ax.plot(x, y, color='#6699cc', alpha=0.7,
+            linewidth=3, solid_capstyle='round', zorder=2)
+    ax.set_title('Polygon')
+    plt.show()
+    """
+    shear_L_UD = perp_line.union(LineString(list(shear_L.exterior.coords)))
+    shear_R_UD = perp_line.union(LineString(list(shear_R.exterior.coords)))
+
+    shear_L_UD = polygonize(shear_L_UD)
+    shear_R_UD = polygonize(shear_R_UD)
+
+    shear_L_D = next(shear_L_UD)
+    shear_L_U = next(shear_L_UD)
+
+    shear_R_D = next(shear_R_UD)
+    shear_R_U = next(shear_R_UD)
+
+    """
+    x,y = shear_R_D.exterior.coords.xy
+
+    fig = plt.figure(1, figsize=(5,5), dpi=90)
+    ax = fig.add_subplot(111)
+    ax.plot(x, y, color='#6699cc', alpha=0.7,
+            linewidth=3, solid_capstyle='round', zorder=2)
+    ax.set_title('Polygon')
+    plt.show()
+    """
+    quadrant_polys = {'RD': shear_R_D, 'RU': shear_R_U, 'LU': shear_L_U, 'LD': shear_L_D}
+
+    return quadrant_polys
+
+
+
+def sort_glm_coords(quadrant_polys, glm_coords):
+    """
+    Parameters
+    ----------
+    quadrant_polys : dict of polygons
+        Dictionary of polygons representing shear-relative quadrants of the TC
+        Keys: RD, RU, LU, LD
+    glm_coords : Tuple of lists
+        Tuple of list. Format: (flash_lons, flash_lats)
+
+    Returns
+    -------
+    glm_coords_sorted : Dict of tuples
+        Dictionary of tuples containing GLM flash coordinates for a specific
+        quadrant. Ex: {'RD': (flash_lons, flash_lats), 'RD': (flash_lons, flash_lats)...}
+    """
+    glm_coords_sorted = {'RD': ([],[]), 'RU': ([],[]), 'LU': ([],[]), 'LD': ([],[])}
+    orphan = 0
+    placed = False
+
+    flash_lons = glm_coords[0]
+    flash_lats = glm_coords[1]
+
+    for idx, lon in enumerate(flash_lons):
+        lat = flash_lats[idx]
+        curr_point = Point(lon, lat)
+
+        for quadrant, poly in quadrant_polys.items():
+            if (poly.contains(curr_point)):
+                glm_coords_sorted[quadrant][0].append(lon)
+                glm_coords_sorted[quadrant][1].append(lat)
+                placed = True
+        if (not placed):
+            orphan += 1
+
+    print("Orphan flash coordinates: " + str(orphan) + "\n")
+
+    return glm_coords_sorted
 
 
 

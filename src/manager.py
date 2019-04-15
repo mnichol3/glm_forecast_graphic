@@ -18,7 +18,7 @@ from os import listdir, mkdir, remove
 from os.path import isdir, isfile, join, exists
 import numpy as np
 #import utils
-from glm_tc_graphic import accumulate_glm_data, plot_mercator, read_file
+import glm_tc_graphic
 from common import get_os
 import utils
 import ships_parse
@@ -199,11 +199,14 @@ def main():
     subdirs = ['abi', 'glm', 'vdm', 'imgs', 'SHIPS']
     default_octant = "REPNT2"
 
-    hist_fname = storm_name + "-" + year + ".txt"
+    hist_fname = storm_name + "-" + year
     hist_path = PATH_LINUX_HIST + "/" + hist_fname
 
-    if (exists(hist_path)):
-        remove(hist_path)
+    hist_extensions = ['RD', 'RU', 'LD', 'LU']
+    for ext in hist_extensions:
+        temp_hist_path = hist_path + "-" + ext + ".txt"
+        if (exists(temp_hist_path)):
+            remove(temp_hist_path)
 
     print('\nProcessing storm: ' + year + '-' + storm_name + '\n')
 
@@ -258,31 +261,39 @@ def main():
         curr_row = coords.iloc[idx]
 
         # NOTE: Longitude is never decoded as negative, even when it should be
-        center_coords = (float(format(curr_row['lons'], '.3f')),
+        center_coords = (float(format(curr_row['lons'] * -1, '.3f')),
                             float(format(curr_row['lats'], '.3f')))
 
         rmw = int(curr_row['rmw'])
 
-        glm_data = accumulate_glm_data(dt, center_coords, storm_name)
+        glm_data = glm_tc_graphic.accumulate_glm_data(dt, center_coords, storm_name)
 
         print('Parsing ABI data...\n')
-        data_dict = read_file(abi_fname)
+        data_dict = glm_tc_graphic.read_file(abi_fname)
 
         print('Retrieving wind shear data...\n')
         ships_data = ships_parse.fetch_file(dt + '00', storm_name, basin='AL', write=True)
         wind_shear = (ships_data['shear_dir'], ships_data['shear_spd'])
 
         print('Creating graphic for ' + curr_storm_dt + '...\n')
-        plot_mercator(data_dict, glm_data, center_coords, rmw, wind_shear, storm_name)
+        bounding_poly = glm_tc_graphic.plot_mercator(data_dict, glm_data, center_coords,
+                                                     rmw, wind_shear, storm_name)
+
+        print("Creating bounding polygon...\n")
+        quad_polys = glm_tc_graphic.bbox_poly(center_coords, wind_shear[0], bounding_poly)
+
+        print("Sorting GLM flash coordinates...\n")
+        quad_coords = glm_tc_graphic.sort_glm_coords(quad_polys, glm_data)
 
         print('Writing flash histogram data to file...\n')
-        hist, bins = hovmoller.histogram(glm_data, center_coords)
-        hist = np.insert(hist, 0, rmw, axis=0)
-        hist = np.insert(hist, 0, dt + "00", axis=0)
+        for quadrant, sorted_coords in quad_coords.items():
+            hist, bins = hovmoller.histogram(sorted_coords, center_coords)
+            hist = np.insert(hist, 0, rmw, axis=0)
+            hist = np.insert(hist, 0, dt + "00", axis=0)
 
-        with open(hist_path, 'a') as f:
-            np.savetxt(f, hist, fmt="%01.1d", delimiter=",", newline=" ")
-            f.write("\n")
+            with open(hist_path + "-" + quadrant + ".txt", 'a') as f:
+                np.savetxt(f, hist, fmt="%01.1d", delimiter=",", newline=" ")
+                f.write("\n")
 
         print('-----------------------------------------------------------------')
         print('-----------------------------------------------------------------')

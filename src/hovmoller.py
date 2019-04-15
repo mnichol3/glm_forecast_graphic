@@ -5,6 +5,7 @@ import pandas as pd
 import matplotlib
 from glm_tc_graphic import quadrant_bounding_box
 
+HIST_PATH_LINUX = '/media/mnichol3/easystore/data/hist/'
 
 def histogram(glm_coords, center_coords):
     dist = []
@@ -27,7 +28,7 @@ def histogram(glm_coords, center_coords):
 
 
 # TODO: Add bins_fname param to dynamically get bin array length
-def hovmoller_plot(hist_fname, bins_fname=None):
+def hovmoller_plot(hist_fname, quadrant, bins_fname=None):
     """
     Creates a hovmoller plot of lightning flash density
 
@@ -58,17 +59,22 @@ def hovmoller_plot(hist_fname, bins_fname=None):
 
     im = plt.contourf(Xs, Ys, data_list, levels=Xs,cmap=cmap)
     ax.yaxis.set_major_locator(plt.MaxNLocator(20))
+    plt.title("FLORENCE-2018 " + quadrant + " Quadrant Total Lightning")
     fig.tight_layout()
 
     plt.show()
 
 
 
+def main():
+    quadrants = {'RU': 'Right Upshear', 'RD': 'Right Downshear', 'LD': 'Left Downshear',
+                 'LU': 'Left Upshear'}
+
+    for key, val in quadrants.items():
+        hist_fname = HIST_PATH_LINUX + 'FLORENCE-2018-' + key +  '.txt'
+        data = hovmoller_plot(hist_fname, val)
 
 
 
-
-#hist_fname = '/media/mnichol3/easystore/data/hist/FLORENCE-2018.txt'
-#bins_fname
-#data = hovmoller_plot(hist_fname)
-#quadrant_bounding_box((-76.48, 38.98), 0)
+if __name__ == "__main__":
+    main()
