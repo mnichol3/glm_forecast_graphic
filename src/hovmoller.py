@@ -71,6 +71,7 @@ def main():
                  'LU': 'Left Upshear'}
 
     for key, val in quadrants.items():
+        print("Creating Hovmoller plot for Florence " + val + "...\n")
         hist_fname = HIST_PATH_LINUX + 'FLORENCE-2018-' + key +  '.txt'
         data = hovmoller_plot(hist_fname, val)
 
