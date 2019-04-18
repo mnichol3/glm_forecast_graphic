@@ -19,9 +19,10 @@ def histogram(glm_coords, center_coords):
         dist.append(curr_dist)
 
     # Bin edges
+    # 16 bins = 25 miles
     # [  0.  25.  50.  75. 100. 125. 150. 175. 200. 225. 250. 275. 300. 325.
     #    350. 375. 400.]
-    hist, bins = np.histogram(dist, bins=16, range=(0,400))
+    hist, bins = np.histogram(dist, bins=40, range=(0,400))
 
     # [ 12   5   0  11 459 323 452 220 271  82  48  69  44   5  99  27]
     return hist, bins
@@ -60,6 +61,12 @@ def hovmoller_plot(hist_fname, quadrant, bins_fname=None):
     im = plt.contourf(Xs, Ys, data_list, levels=Xs,cmap=cmap)
     ax.yaxis.set_major_locator(plt.MaxNLocator(20))
     plt.title("FLORENCE-2018 " + quadrant + " Quadrant Total Lightning")
+    plt.xlabel("Radial Distance (km)")
+    plt.ylabel("Date & Time")
+
+    cbar = plt.colorbar(im)
+    cbar.set_label("Total Lightning Flashes (1/hr)")
+
     fig.tight_layout()
 
     plt.show()
