@@ -325,6 +325,9 @@ def plot_mercator(data_dict, glm_data, center_coords, rmw, wind_shear, storm_nam
     coord_list = geodesic_point_buffer(cent_lat, cent_lon, 400)
     bounding_poly = shp_Polygon(coord_list)
 
+    # Uncomment to plot shear-relative quadrant polygons
+    # RD = red, RU = green, LU = blue, LD = cyan
+    """
     quad_polys = bbox_poly(center_coords, wind_shear[0], bounding_poly)
 
     poly_colors='rgbc'
@@ -336,6 +339,7 @@ def plot_mercator(data_dict, glm_data, center_coords, rmw, wind_shear, storm_nam
                 linewidth=3, solid_capstyle='round', transform=ccrs.PlateCarree())
 
         idx += 1
+    """
 
     # Draw the RMW
     rmw_ring = geodesic_point_buffer(cent_lat, cent_lon, rmw * 1.852) # convert nm to km
