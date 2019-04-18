@@ -325,6 +325,17 @@ def plot_mercator(data_dict, glm_data, center_coords, rmw, wind_shear, storm_nam
     coord_list = geodesic_point_buffer(cent_lat, cent_lon, 400)
     bounding_poly = shp_Polygon(coord_list)
 
+    quad_polys = bbox_poly(center_coords, wind_shear[0], bounding_poly)
+
+    poly_colors='rgbc'
+    idx = 0
+    for key, val in quad_polys.items():
+        x,y = val.exterior.coords.xy
+
+        ax.plot(x, y, color=poly_colors[idx], alpha=0.7,
+                linewidth=3, solid_capstyle='round', transform=ccrs.PlateCarree())
+
+        idx += 1
 
     # Draw the RMW
     rmw_ring = geodesic_point_buffer(cent_lat, cent_lon, rmw * 1.852) # convert nm to km
@@ -355,13 +366,6 @@ def plot_mercator(data_dict, glm_data, center_coords, rmw, wind_shear, storm_nam
     # Create shear vector
     shear_vector(ax, plt, cent_lon, cent_lat, wind_shear, width=0.01, head_width=0.08,
             head_length=0.1, fc='k', ec='k', zorder=15)
-
-    """
-    bbox = quadrant_bounding_box((cent_lon, cent_lat), wind_shear[0])
-
-    for coords in bbox:
-        plt.plot([cent_lon, coords[0]],[cent_lat,coords[1]], transform=ccrs.PlateCarree())
-    """
 
     plt.scatter(cent_lon,cent_lat, marker="+", color="r", transform=ccrs.PlateCarree(),
                 s = 200)

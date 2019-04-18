@@ -281,7 +281,7 @@ def main():
         data_dict = glm_tc_graphic.read_file(abi_fname)
 
         print('Retrieving wind shear data...\n')
-        ships_data = ships_parse.fetch_file(dt + '00', storm_name, basin='AL', write=True)
+        ships_data = ships_parse.fetch_file_local(dt + '00', storm_name, basin='AL', write=True)
         wind_shear = (ships_data['shear_dir'], ships_data['shear_spd'])
 
         print('Creating graphic for ' + curr_storm_dt + '...\n')
