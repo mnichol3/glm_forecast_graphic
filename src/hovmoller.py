@@ -29,7 +29,7 @@ def histogram(glm_coords, center_coords):
 
 
 # TODO: Add bins_fname param to dynamically get bin array length
-def hovmoller_plot(hist_fname, quadrant, bins_fname=None):
+def hovmoller_plot(hist_fname, quadrant, bin_dist):
     """
     Creates a hovmoller plot of lightning flash density
 
@@ -42,8 +42,8 @@ def hovmoller_plot(hist_fname, quadrant, bins_fname=None):
     data_list = []
     Ys = []
     rmws = []
-    Xs = [0, 25, 50, 75, 100, 125, 150, 175, 200, 225, 250, 275, 300, 325, 350,
-          375]
+
+    Xs = list(np.arange(0, 400, bin_dist))
 
     with open(hist_fname, 'r') as f:
         for line in f:
@@ -58,9 +58,9 @@ def hovmoller_plot(hist_fname, quadrant, bins_fname=None):
 
     cmap = plt.get_cmap('hot')
 
-    im = plt.contourf(Xs, Ys, data_list, levels=Xs,cmap=cmap)
+    im = plt.contourf(Xs, Ys, data_list, levels=Xs, cmap=cmap)
     ax.yaxis.set_major_locator(plt.MaxNLocator(20))
-    plt.title("FLORENCE-2018 " + quadrant + " Quadrant Total Lightning")
+    plt.title("MICHAEL-2018 " + quadrant + " Quadrant Total Lightning")
     plt.xlabel("Radial Distance (km)")
     plt.ylabel("Date & Time")
 
@@ -78,9 +78,9 @@ def main():
                  'LU': 'Left Upshear'}
 
     for key, val in quadrants.items():
-        print("Creating Hovmoller plot for Florence " + val + "...\n")
-        hist_fname = HIST_PATH_LINUX + 'FLORENCE-2018-' + key +  '.txt'
-        data = hovmoller_plot(hist_fname, val)
+        print("Creating Hovmoller plot for Michael " + val + "...\n")
+        hist_fname = HIST_PATH_LINUX + 'MICHAEL-2018-' + key +  '.txt'
+        data = hovmoller_plot(hist_fname, val, 10)
 
 
 

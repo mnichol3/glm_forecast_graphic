@@ -190,16 +190,22 @@ def main():
     # Takes ~35 seconds to produce 1 graphic
 
     year = '2018'
-    storm_name = 'FLORENCE'
-    start_date = '201809101400' #'201809082200'
-    end_date = '201809140300'
+    storm_name = 'MICHAEL'
+    start_date = '201810070000' #'201809082200'
+    end_date = '201810101800'
 
-    storm_dict = {'FLORENCE': ['201809010900', '201809140300', 'meso2']}
+    """
+    storm_dict = {'FLORENCE': ['201809010900', '201809140300', 'meso2'],
+                  'MICHAEL': ['201809010900', '201809140300', 'meso2']}
+    """
 
+    """
     bad_glm_datetimes = ['2018091015', '2018091016', '2018091017', '2018091018',
                          '2018091019', '2018091020', '2018091021', '2018091115',
                          '2018091115', '2018091116', '2018091117', '2018091118',
                          '2018091119', '2018091120', '2018091121']
+    """
+    bad_glm_datetimes = []
 
     subdirs = ['abi', 'glm', 'vdm', 'imgs', 'SHIPS']
     default_octant = "REPNT2"
@@ -250,10 +256,13 @@ def main():
 
         print('Downloading ABI data for ' + curr_storm_dt + '...\n')
 
+        """
         if (int(dt) <= 2018091014):
             sector = 'meso2'
         else:
             sector = 'meso1'
+        """
+        sector = 'meso1'
 
         print('ABI sector: ' + sector + '\n')
 
