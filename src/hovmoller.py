@@ -29,7 +29,7 @@ def histogram(glm_coords, center_coords):
 
 
 # TODO: Add bins_fname param to dynamically get bin array length
-def hovmoller_plot(hist_fname, quadrant, bins_fname=None):
+def hovmoller_plot(hist_fname, quadrant, bin_dist):
     """
     Creates a hovmoller plot of lightning flash density
 
@@ -42,8 +42,7 @@ def hovmoller_plot(hist_fname, quadrant, bins_fname=None):
     data_list = []
     Ys = []
     rmws = []
-    Xs = [0, 25, 50, 75, 100, 125, 150, 175, 200, 225, 250, 275, 300, 325, 350,
-          375]
+    Xs = list(np.arange(0, 400, bin_dist))
 
     with open(hist_fname, 'r') as f:
         for line in f:
@@ -80,7 +79,7 @@ def main():
     for key, val in quadrants.items():
         print("Creating Hovmoller plot for Florence " + val + "...\n")
         hist_fname = HIST_PATH_LINUX + 'FLORENCE-2018-' + key +  '.txt'
-        data = hovmoller_plot(hist_fname, val)
+        data = hovmoller_plot(hist_fname, val, 25)
 
 
 
