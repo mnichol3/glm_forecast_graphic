@@ -22,7 +22,7 @@ def histogram(glm_coords, center_coords):
     # 16 bins = 25 miles
     # [  0.  25.  50.  75. 100. 125. 150. 175. 200. 225. 250. 275. 300. 325.
     #    350. 375. 400.]
-    hist, bins = np.histogram(dist, bins=40, range=(0,400))
+    hist, bins = np.histogram(dist, bins=20, range=(0,200))
 
     # [ 12   5   0  11 459 323 452 220 271  82  48  69  44   5  99  27]
     return hist, bins

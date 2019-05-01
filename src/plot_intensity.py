@@ -35,10 +35,10 @@ def plot_intensity(fname):
     timespan = np.arange(0, 84, 6)
     timespan_interp = np.arange(0, 84, 1)
 
-    print(timespan)
-    print(timespan_interp)
-
     wind_interp = np.interp(timespan_interp, timespan, wind)
+
+    print(datetimes)
+    sys.exit(0)
 
     fig, ax = plt.subplots()
     ax.plot(timespan_interp, wind_interp, 'r^-', label = 'Sustained Wind (kt)')
