@@ -474,9 +474,9 @@ def vdm_df(date_time_start, date_time_end, storm_name, octant = 'REPNT2'):
                            curr_list.append(mslp.group(1))      # min SLP
                        else:
                            curr_list.append(0)
-                       curr_list.append(data[12][3:])           # inbnd max sfc wind b&r
+                       curr_list.append(data[11][3:] + ' ' + data[12][3:])           # inbnd max sfc wind b&r
                        curr_list.append(data[14][3:])           # inbnd max FL wind b&r
-                       curr_list.append(data[16][3:])           # outbnd max sfc wind b&r
+                       curr_list.append(data[15][3:] + ' ' + data[16][3:])           # outbnd max sfc wind b&r
                        curr_list.append(data[18][3:])           # outbnd max FL wind b&r
                        curr_list.append(data[24][3:])           # acft storm info
 
